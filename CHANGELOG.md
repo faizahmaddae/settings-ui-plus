@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Fixed LICENSE file formatting so pub.dev correctly recognizes Apache-2.0.
+
 ## 0.2.1
 
 ### Accessibility & Platform Fidelity
