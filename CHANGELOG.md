@@ -1,3 +1,8 @@
+## 0.2.7
+
+- Fixed CI golden test failures by excluding platform-sensitive golden tests from CI runners.
+- Added `@Tags(['golden'])` annotation and `dart_test.yaml` for proper test tag management.
+
 ## 0.2.6
 
 - Added GitHub Actions CI workflow (format, analyze, test on every push/PR).
