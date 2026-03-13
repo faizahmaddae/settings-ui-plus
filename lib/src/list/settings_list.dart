@@ -53,9 +53,18 @@ class SettingsList extends StatelessWidget {
 
     final brightness = calculateBrightness(context);
 
+    // Use the app's ColorScheme.primary for Material section titles so they
+    // adapt to the app's theme instead of using a hardcoded blue.
+    final isMaterialPlatform =
+        platform != DevicePlatform.iOS && platform != DevicePlatform.macOS;
+
     final themeData = ThemeProvider.getTheme(
       platform: platform,
       brightness: brightness,
+    ).copyWith(
+      titleTextColor: isMaterialPlatform
+          ? Theme.of(context).colorScheme.primary
+          : null,
     ).merge(theme: brightness == Brightness.dark ? darkTheme : lightTheme);
 
     return ColoredBox(

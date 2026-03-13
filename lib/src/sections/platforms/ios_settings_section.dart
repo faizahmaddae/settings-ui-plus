@@ -60,11 +60,11 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
 
     return Padding(
       padding: widget.margin ??
-          EdgeInsets.only(
+          EdgeInsetsDirectional.only(
             top: 14.0 * scaleFactor,
-            bottom: isLastNonDescriptive ? 27 * scaleFactor : 10 * scaleFactor,
-            left: 16,
-            right: 16,
+            bottom: isLastNonDescriptive ? 21 * scaleFactor : 10 * scaleFactor,
+            start: 16,
+            end: 16,
           ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,8 +118,9 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
               ),
               child: DefaultTextStyle(
                 style: TextStyle(
-                  color: theme.themeData.titleTextColor,
-                  fontSize: 12,
+                  color: theme.themeData.inactiveTitleColor,
+                  fontSize: 13,
+                  letterSpacing: -0.08,
                 ),
                 child: widget.footer!,
               ),

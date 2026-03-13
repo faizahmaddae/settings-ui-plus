@@ -50,17 +50,25 @@ class MaterialSettingsTile extends StatelessWidget {
     final theme = SettingsTheme.of(context);
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
 
+    if (tileType == SettingsTileType.sliderTile) {
+      return _buildSliderTile(context, theme, scaleFactor);
+    }
+
     final cantShowAnimation = tileType == SettingsTileType.switchTile
         ? onToggle == null && onPressed == null
-        : tileType == SettingsTileType.sliderTile
-            ? onSliderChanged == null && onPressed == null
-            : onPressed == null;
+        : onPressed == null;
 
     return Semantics(
       enabled: enabled,
       toggled: tileType == SettingsTileType.switchTile ? initialValue : null,
       button: tileType != SettingsTileType.switchTile,
-      hint: onPressed != null ? 'Double-tap to activate' : null,
+      hint: tileType == SettingsTileType.switchTile
+          ? (onToggle != null ? 'Double-tap to toggle' : null)
+          : tileType == SettingsTileType.sliderTile
+              ? (onSliderChanged != null || onPressed != null
+                  ? 'Adjust with slider'
+                  : null)
+              : (onPressed != null ? 'Double-tap to activate' : null),
       child: Opacity(
         opacity: enabled ? 1.0 : 0.38,
         child: IgnorePointer(
@@ -153,18 +161,6 @@ class MaterialSettingsTile extends StatelessWidget {
                               child: value ?? description!,
                             ),
                           ),
-                        if (tileType == SettingsTileType.sliderTile)
-                          Slider(
-                            value: sliderValue ?? sliderMin,
-                            min: sliderMin,
-                            max: sliderMax,
-                            divisions: sliderDivisions,
-                            label: sliderDivisions != null
-                                ? (sliderValue ?? sliderMin).toStringAsFixed(0)
-                                : null,
-                            onChanged: enabled ? onSliderChanged : null,
-                            activeColor: sliderActiveColor,
-                          ),
                       ],
                     ),
                   ),
@@ -179,9 +175,7 @@ class MaterialSettingsTile extends StatelessWidget {
                         child: Switch(
                           value: initialValue,
                           onChanged: onToggle,
-                          activeTrackColor: enabled
-                              ? activeSwitchColor
-                              : theme.themeData.inactiveTitleColor,
+                          activeTrackColor: enabled ? activeSwitchColor : null,
                         ),
                       ),
                     ],
@@ -193,9 +187,7 @@ class MaterialSettingsTile extends StatelessWidget {
                     child: Switch(
                       value: initialValue,
                       onChanged: onToggle,
-                      activeTrackColor: enabled
-                          ? activeSwitchColor
-                          : theme.themeData.inactiveTitleColor,
+                      activeTrackColor: enabled ? activeSwitchColor : null,
                     ),
                   )
                 else if (trailing != null)
@@ -216,6 +208,155 @@ class MaterialSettingsTile extends StatelessWidget {
           ),
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _buildSliderTile(
+    BuildContext context,
+    SettingsTheme theme,
+    double scaleFactor,
+  ) {
+    return Semantics(
+      enabled: enabled,
+      hint: onSliderChanged != null || onPressed != null
+          ? 'Adjust with slider'
+          : null,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.38,
+        child: IgnorePointer(
+          ignoring: !enabled,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onLongPress: onLongPress == null
+                ? null
+                : () => onLongPress!.call(context),
+            child: Container(
+            color: Colors.transparent,
+            padding: EdgeInsetsDirectional.only(
+              top: 12 * scaleFactor,
+              bottom: 8 * scaleFactor,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Leading icon, vertically centered
+                if (leading != null)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 24),
+                    child: IconTheme(
+                      data: IconTheme.of(context).copyWith(
+                        color: enabled
+                            ? theme.themeData.leadingIconsColor
+                            : theme.themeData.inactiveTitleColor,
+                      ),
+                      child: leading!,
+                    ),
+                  ),
+                // Content column: title row + description + slider
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title row: title + value + trailing
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 24,
+                          end: 24,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: DefaultTextStyle(
+                                style: theme.themeData.titleTextStyle?.copyWith(
+                                      color: enabled
+                                          ? theme.themeData.settingsTileTextColor
+                                          : theme.themeData.inactiveTitleColor,
+                                    ) ??
+                                    TextStyle(
+                                      color: enabled
+                                          ? theme.themeData.settingsTileTextColor
+                                          : theme.themeData.inactiveTitleColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                child: title ?? const SizedBox.shrink(),
+                              ),
+                            ),
+                            if (value != null)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(start: 8),
+                                child: DefaultTextStyle(
+                                  style: TextStyle(
+                                    color: enabled
+                                        ? theme.themeData.tileDescriptionTextColor
+                                        : theme.themeData.inactiveSubtitleColor,
+                                    fontSize: 14,
+                                  ),
+                                  child: value!,
+                                ),
+                              ),
+                            if (trailing != null)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(start: 8),
+                                child: trailing!,
+                              ),
+                          ],
+                        ),
+                      ),
+                      // Description below title if present
+                      if (description != null)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            start: 24,
+                            end: 24,
+                            top: 4,
+                          ),
+                          child: DefaultTextStyle(
+                            style:
+                                theme.themeData.descriptionTextStyle?.copyWith(
+                                      color: enabled
+                                          ? theme.themeData.tileDescriptionTextColor
+                                          : theme.themeData.inactiveSubtitleColor,
+                                    ) ??
+                                    TextStyle(
+                                      color: enabled
+                                          ? theme.themeData.tileDescriptionTextColor
+                                          : theme.themeData.inactiveSubtitleColor,
+                                    ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            child: description!,
+                          ),
+                        ),
+                      // Slider aligned under the text content
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          start: 8,
+                          end: 8,
+                        ),
+                        child: Slider(
+                          value: sliderValue ?? sliderMin,
+                          min: sliderMin,
+                          max: sliderMax,
+                          divisions: sliderDivisions,
+                          label: sliderDivisions != null
+                              ? (sliderValue ?? sliderMin).toStringAsFixed(0)
+                              : null,
+                          onChanged: enabled ? onSliderChanged : null,
+                          activeColor: sliderActiveColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ),
+        ),
       ),
     );
   }

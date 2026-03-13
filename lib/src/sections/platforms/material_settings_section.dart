@@ -145,7 +145,7 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
 
     return Padding(
-      padding: widget.margin ?? EdgeInsets.zero,
+      padding: widget.margin ?? EdgeInsetsDirectional.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -193,7 +193,7 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
             sizeFactor: expandAnimation,
             child: Card(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
               elevation: 4,
               color: theme.themeData.settingsSectionBackground,
               child: _buildTileList(showSeparators: true),
@@ -231,8 +231,8 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
         separatorBuilder: (BuildContext context, int index) {
           final theme = SettingsTheme.of(context);
           return Divider(
-            height: 0,
-            thickness: 1,
+            height: 1.0,
+            thickness: 1.0,
             color: theme.themeData.dividerColor,
           );
         },

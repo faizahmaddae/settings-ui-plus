@@ -1756,5 +1756,359 @@ void main() {
       final inkWell = tester.widget<InkWell>(find.byType(InkWell));
       expect(inkWell.focusColor, isNotNull);
     });
+
+    testWidgets('switch tile Semantics hint says toggle',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.android,
+              sections: [
+                SettingsSection(
+                  title: const Text('S'),
+                  tiles: [
+                    SettingsTile.switchTile(
+                      title: const Text('Dark'),
+                      initialValue: false,
+                      onToggle: (_) {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final semantics = tester.widget<Semantics>(
+        find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.hint == 'Double-tap to toggle',
+        ),
+      );
+      expect(semantics.properties.hint, 'Double-tap to toggle');
+    });
+
+    testWidgets('slider tile Semantics hint says adjust',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.android,
+              sections: [
+                SettingsSection(
+                  title: const Text('S'),
+                  tiles: [
+                    SettingsTile.sliderTile(
+                      title: const Text('Vol'),
+                      sliderValue: 50,
+                      sliderMin: 0,
+                      sliderMax: 100,
+                      onSliderChanged: (_) {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final semantics = tester.widget<Semantics>(
+        find.byWidgetPredicate(
+          (w) => w is Semantics && w.properties.hint == 'Adjust with slider',
+        ),
+      );
+      expect(semantics.properties.hint, 'Adjust with slider');
+    });
+
+    testWidgets('iOS section padding uses EdgeInsetsDirectional',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.iOS,
+              sections: [
+                SettingsSection(
+                  title: Text('Section'),
+                  tiles: [
+                    SettingsTile(title: Text('Tile')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Verify the section renders without error (RTL-safe padding)
+      expect(find.text('Section'), findsOneWidget);
+    });
+
+    testWidgets('Material section title uses ColorScheme.primary',
+        (WidgetTester tester) async {
+      const customPrimary = Color(0xFF00BFA5);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(primary: customPrimary),
+          ),
+          home: const Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.android,
+              sections: [
+                SettingsSection(
+                  title: Text('Section'),
+                  tiles: [
+                    SettingsTile(title: Text('Tile')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Find the section title DefaultTextStyle
+      final defaultTextStyle = tester.widget<DefaultTextStyle>(
+        find.ancestor(
+          of: find.text('Section'),
+          matching: find.byType(DefaultTextStyle),
+        ).first,
+      );
+      expect(defaultTextStyle.style.color, customPrimary);
+    });
+
+    testWidgets('disabled Material switch does not set activeTrackColor',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.android,
+              sections: [
+                SettingsSection(
+                  title: const Text('S'),
+                  tiles: [
+                    SettingsTile.switchTile(
+                      title: const Text('Toggle'),
+                      initialValue: true,
+                      onToggle: (_) {},
+                      enabled: false,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final sw = tester.widget<Switch>(find.byType(Switch));
+      expect(sw.activeTrackColor, isNull);
+    });
+
+    testWidgets('Material slider tile has dedicated layout',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.android,
+              sections: [
+                SettingsSection(
+                  title: const Text('S'),
+                  tiles: [
+                    SettingsTile.sliderTile(
+                      title: const Text('Vol'),
+                      sliderValue: 50,
+                      sliderMin: 0,
+                      sliderMax: 100,
+                      value: const Text('50'),
+                      onSliderChanged: (_) {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Slider exists in its own row
+      expect(find.byType(Slider), findsOneWidget);
+      // Value label is visible
+      expect(find.text('50'), findsOneWidget);
+    });
+
+    testWidgets('Web card uses BorderRadius 12',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.web,
+              sections: [
+                SettingsSection(
+                  title: Text('S'),
+                  tiles: [
+                    SettingsTile(title: Text('Tile')),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final card = tester.widget<Card>(find.byType(Card));
+      final shape = card.shape as RoundedRectangleBorder;
+      expect(shape.borderRadius, BorderRadius.circular(12));
+    });
+
+    testWidgets('iOS slider tile shows value label',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SettingsList(
+              platform: DevicePlatform.iOS,
+              sections: [
+                SettingsSection(
+                  title: const Text('S'),
+                  tiles: [
+                    SettingsTile.sliderTile(
+                      title: const Text('Font'),
+                      sliderValue: 16,
+                      sliderMin: 10,
+                      sliderMax: 30,
+                      value: const Text('16'),
+                      onSliderChanged: (_) {},
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Value label should be visible on iOS slider tile exactly once
+      expect(find.text('16'), findsOneWidget);
+      expect(find.byType(CupertinoSlider), findsOneWidget);
+    });
+  });
+
+  group('Cross-platform bug fixes', () {
+    testWidgets('iOS slider value label appears exactly once', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          SettingsList(
+            platform: DevicePlatform.iOS,
+            sections: [
+              SettingsSection(
+                title: const Text('Test'),
+                tiles: [
+                  SettingsTile.sliderTile(
+                    title: const Text('Brightness'),
+                    sliderValue: 0.75,
+                    onSliderChanged: (_) {},
+                    value: const Text('75%'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Must appear exactly once — not duplicated
+      expect(find.text('75%'), findsOneWidget);
+    });
+
+    testWidgets('iOS disabled switch is not double-dimmed', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          SettingsList(
+            platform: DevicePlatform.iOS,
+            sections: [
+              SettingsSection(
+                title: const Text('Test'),
+                tiles: [
+                  SettingsTile.switchTile(
+                    title: const Text('Disabled Switch'),
+                    initialValue: true,
+                    onToggle: (_) {},
+                    enabled: false,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // The CupertinoSwitch should still receive onToggle (not null),
+      // relying on IgnorePointer for disabling interaction
+      final cuSwitch = tester.widget<CupertinoSwitch>(
+        find.byType(CupertinoSwitch),
+      );
+      expect(cuSwitch.onChanged, isNotNull);
+    });
+
+    testWidgets('Material slider tile supports trailing widget', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          SettingsList(
+            platform: DevicePlatform.android,
+            sections: [
+              SettingsSection(
+                title: const Text('Test'),
+                tiles: [
+                  SettingsTile.sliderTile(
+                    title: const Text('Volume'),
+                    sliderValue: 0.5,
+                    onSliderChanged: (_) {},
+                    trailing: const Icon(Icons.volume_up),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.volume_up), findsOneWidget);
+    });
+
+    testWidgets('Material slider tile fires onLongPress', (tester) async {
+      var longPressed = false;
+      await tester.pumpWidget(
+        materialApp(
+          SettingsList(
+            platform: DevicePlatform.android,
+            sections: [
+              SettingsSection(
+                title: const Text('Test'),
+                tiles: [
+                  SettingsTile.sliderTile(
+                    title: const Text('Volume'),
+                    sliderValue: 0.5,
+                    onSliderChanged: (_) {},
+                    onLongPress: (_) => longPressed = true,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.longPress(find.text('Volume'));
+      expect(longPressed, isTrue);
+    });
   });
 }

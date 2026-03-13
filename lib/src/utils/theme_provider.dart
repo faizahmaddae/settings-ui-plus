@@ -39,10 +39,10 @@ abstract final class _IOSColors {
   static const lightTitle = Color.fromRGBO(109, 109, 114, 1);
   static const darkTitle = Color.fromARGB(255, 152, 152, 159);
 
-  static const lightDivider = Color.fromARGB(255, 238, 238, 238);
+  static const lightDivider = Color.fromARGB(255, 198, 198, 200);
   static const darkDivider = Color.fromARGB(255, 40, 40, 42);
 
-  static const lightTrailingText = Color.fromARGB(255, 138, 138, 142);
+  static const lightTrailingText = Color.fromARGB(255, 110, 110, 115);
   static const darkTrailingText = Color.fromARGB(255, 152, 152, 159);
 
   static const lightTileHighlight = Color.fromARGB(255, 209, 209, 214);

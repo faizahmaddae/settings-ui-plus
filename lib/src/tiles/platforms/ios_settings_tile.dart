@@ -65,7 +65,13 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
               ? widget.initialValue
               : null,
       button: widget.tileType != SettingsTileType.switchTile,
-      hint: widget.onPressed != null ? 'Double-tap to activate' : null,
+      hint: widget.tileType == SettingsTileType.switchTile
+          ? (widget.onToggle != null ? 'Double-tap to toggle' : null)
+          : widget.tileType == SettingsTileType.sliderTile
+              ? (widget.onSliderChanged != null || widget.onPressed != null
+                  ? 'Adjust with slider'
+                  : null)
+              : (widget.onPressed != null ? 'Double-tap to activate' : null),
       child: Opacity(
         opacity: widget.enabled ? 1.0 : 0.5,
         child: IgnorePointer(
@@ -136,10 +142,14 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
       ),
       child: DefaultTextStyle(
         style: theme.themeData.descriptionTextStyle?.copyWith(
-              color: theme.themeData.titleTextColor,
+              color: widget.enabled
+                  ? theme.themeData.tileDescriptionTextColor
+                  : theme.themeData.inactiveTitleColor,
             ) ??
             TextStyle(
-              color: theme.themeData.titleTextColor,
+              color: widget.enabled
+                  ? theme.themeData.tileDescriptionTextColor
+                  : theme.themeData.inactiveTitleColor,
               fontSize: 13,
             ),
         maxLines: 3,
@@ -161,12 +171,13 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
         if (widget.tileType == SettingsTileType.switchTile)
           CupertinoSwitch(
             value: widget.initialValue ?? false,
-            onChanged: widget.enabled ? widget.onToggle : null,
+            onChanged: widget.onToggle,
             activeTrackColor: widget.enabled
                 ? widget.activeSwitchColor
                 : null,
           ),
-        if (widget.tileType == SettingsTileType.navigationTile &&
+        if ((widget.tileType == SettingsTileType.navigationTile ||
+                widget.tileType == SettingsTileType.sliderTile) &&
             widget.value != null)
           DefaultTextStyle(
             style: TextStyle(
@@ -212,6 +223,179 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     SettingsTheme theme,
     IOSSettingsTileAdditionalInfo additionalInfo,
   ) {
+    if (widget.tileType == SettingsTileType.sliderTile) {
+      return _buildSliderTileContent(context, theme, additionalInfo);
+    }
+    return _buildStandardTileContent(context, theme, additionalInfo);
+  }
+
+  Widget _buildSliderTileContent(
+    BuildContext context,
+    SettingsTheme theme,
+    IOSSettingsTileAdditionalInfo additionalInfo,
+  ) {
+    final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: widget.onPressed == null
+          ? null
+          : () {
+              changePressState(isPressed: false);
+              widget.onPressed!.call(context);
+            },
+      onLongPress: widget.onLongPress == null
+          ? null
+          : () {
+              changePressState(isPressed: false);
+              widget.onLongPress!.call(context);
+            },
+      onTapDown: (_) =>
+          widget.onPressed == null ? null : changePressState(isPressed: true),
+      onTapUp: (_) =>
+          widget.onPressed == null ? null : changePressState(isPressed: false),
+      onTapCancel: () =>
+          widget.onPressed == null ? null : changePressState(isPressed: false),
+      child: Opacity(
+        opacity: isPressed ? 0.7 : 1.0,
+        child: Container(
+          color: theme.themeData.settingsSectionBackground,
+          padding: EdgeInsetsDirectional.only(
+            start: 16,
+            top: 10 * scaleFactor,
+            bottom: 4 * scaleFactor,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Leading icon, vertically centered
+              if (widget.leading != null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 14.0),
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      color: widget.enabled
+                          ? theme.themeData.leadingIconsColor
+                          : theme.themeData.inactiveTitleColor,
+                    ),
+                    child: widget.leading!,
+                  ),
+                ),
+              // Content column: title row + description + slider
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Title row: title ... value
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: DefaultTextStyle(
+                              style: theme.themeData.titleTextStyle?.copyWith(
+                                    color: widget.enabled
+                                        ? theme.themeData.settingsTileTextColor
+                                        : theme.themeData.inactiveTitleColor,
+                                  ) ??
+                                  TextStyle(
+                                    color: widget.enabled
+                                        ? theme.themeData.settingsTileTextColor
+                                        : theme.themeData.inactiveTitleColor,
+                                    fontSize: 17,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              child: widget.title ?? const SizedBox.shrink(),
+                            ),
+                          ),
+                          if (widget.value != null)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(start: 8),
+                              child: DefaultTextStyle(
+                                style: TextStyle(
+                                  color: widget.enabled
+                                      ? theme.themeData.trailingTextColor
+                                      : theme.themeData.inactiveTitleColor,
+                                  fontSize: 17,
+                                ),
+                                child: widget.value!,
+                              ),
+                            ),
+                          if (widget.trailing != null)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(start: 8),
+                              child: widget.trailing!,
+                            ),
+                        ],
+                      ),
+                    ),
+                    // Description below title if present
+                    if (widget.description != null)
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(
+                          end: 16,
+                          top: 2 * scaleFactor,
+                        ),
+                        child: DefaultTextStyle(
+                          style: theme.themeData.descriptionTextStyle?.copyWith(
+                                color: widget.enabled
+                                    ? theme.themeData.tileDescriptionTextColor
+                                    : theme.themeData.inactiveTitleColor,
+                              ) ??
+                              TextStyle(
+                                color: widget.enabled
+                                    ? theme.themeData.tileDescriptionTextColor
+                                    : theme.themeData.inactiveTitleColor,
+                                fontSize: 13,
+                              ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          child: widget.description!,
+                        ),
+                      ),
+                    // Slider filling the full content width
+                    Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        end: 16,
+                        top: 2 * scaleFactor,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: CupertinoSlider(
+                          value: widget.sliderValue ?? widget.sliderMin,
+                          min: widget.sliderMin,
+                          max: widget.sliderMax,
+                          divisions: widget.sliderDivisions,
+                          onChanged:
+                              widget.enabled ? widget.onSliderChanged : null,
+                          activeColor: widget.sliderActiveColor,
+                        ),
+                      ),
+                    ),
+                    if (widget.description == null &&
+                        additionalInfo.needToShowDivider)
+                      Divider(
+                        height: 0,
+                        thickness: 0.5,
+                        color: theme.themeData.dividerColor,
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStandardTileContent(
+    BuildContext context,
+    SettingsTheme theme,
+    IOSSettingsTileAdditionalInfo additionalInfo,
+  ) {
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
 
     return GestureDetector(
@@ -239,12 +423,12 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
         child: Container(
         constraints: const BoxConstraints(minHeight: 44),
         color: theme.themeData.settingsSectionBackground,
-        padding: const EdgeInsetsDirectional.only(start: 18),
+        padding: const EdgeInsetsDirectional.only(start: 16),
         child: Row(
           children: [
             if (widget.leading != null)
               Padding(
-                padding: const EdgeInsetsDirectional.only(end: 12.0),
+                padding: const EdgeInsetsDirectional.only(end: 14.0),
                 child: IconTheme.merge(
                   data: IconThemeData(
                     color: widget.enabled
@@ -283,7 +467,7 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                                   ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              child: widget.title!,
+                              child: widget.title ?? const SizedBox.shrink(),
                             ),
                           ),
                         ),
@@ -291,24 +475,11 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                       ],
                     ),
                   ),
-                  if (widget.tileType == SettingsTileType.sliderTile)
-                    Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 16),
-                      child: CupertinoSlider(
-                        value: widget.sliderValue ?? widget.sliderMin,
-                        min: widget.sliderMin,
-                        max: widget.sliderMax,
-                        divisions: widget.sliderDivisions,
-                        onChanged:
-                            widget.enabled ? widget.onSliderChanged : null,
-                        activeColor: widget.sliderActiveColor,
-                      ),
-                    ),
                   if (widget.description == null &&
                       additionalInfo.needToShowDivider)
                     Divider(
                       height: 0,
-                      thickness: 1.0,
+                      thickness: 0.5,
                       color: theme.themeData.dividerColor,
                     ),
                 ],
