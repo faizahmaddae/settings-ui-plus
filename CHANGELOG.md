@@ -1,3 +1,9 @@
+## 0.2.5
+
+- Updated README with documentation for all new v0.2.4 features: dropdown tiles, searchable settings, sliver support, per-tile theming, animated value transitions, and `fromColorScheme` factory.
+- Added usage examples for every new widget.
+- Updated comparison table and installation version.
+
 ## 0.2.4
 
 ### New Features

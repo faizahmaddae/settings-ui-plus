@@ -24,10 +24,15 @@ Build native-looking settings screens in Flutter with minimal effort. Automatica
 ## Features
 
 - Platform-adaptive UI (Material + Cupertino)
-- Navigation, switch, slider, and radio tiles
+- Navigation, switch, slider, radio, and **dropdown** tiles
+- **Searchable settings** — `SearchableSettingsList` with real-time filtering
+- **Sliver support** — `SliverSettingsList` for `CustomScrollView` integration
 - Expandable & collapsible sections
 - Section headers and footers
 - Custom tiles and custom sections
+- **Per-tile theming** via `SettingsTileThemeData`
+- **Animated value transitions** — smooth cross-fade on tile value changes
+- **`fromColorScheme` factory** — generate a full theme from Material 3 `ColorScheme`
 - Disabled tile support
 - Long-press callbacks on all tiles
 - Light/dark theme overrides via `SettingsThemeData`
@@ -40,7 +45,7 @@ Build native-looking settings screens in Flutter with minimal effort. Automatica
 
 ```yaml
 dependencies:
-  settings_ui_plus: ^0.2.1
+  settings_ui_plus: ^0.2.5
 ```
 
 ```dart
@@ -98,9 +103,89 @@ SettingsList(
 
 ---
 
+## More Examples
+
+### Dropdown Tile
+
+```dart
+SettingsTile.dropdownTile(
+  title: const Text('Language'),
+  leading: const Icon(Icons.language),
+  dropdownValue: 'English',
+  dropdownItems: const ['English', 'Spanish', 'French', 'German'],
+  onDropdownChanged: (value) {},
+)
+```
+
+### Searchable Settings
+
+```dart
+SearchableSettingsList(
+  sections: [
+    SettingsSection(
+      title: const Text('General'),
+      tiles: [
+        SettingsTile.navigation(
+          title: const Text('Language'),
+          value: const Text('English'),
+        ),
+      ],
+    ),
+  ],
+)
+```
+
+### Sliver Settings (inside CustomScrollView)
+
+```dart
+CustomScrollView(
+  slivers: [
+    const SliverAppBar(title: Text('Settings')),
+    SliverSettingsList(
+      sections: [
+        SettingsSection(
+          title: const Text('Account'),
+          tiles: [
+            SettingsTile.navigation(
+              title: const Text('Email'),
+              value: const Text('user@example.com'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+)
+```
+
+### Per-Tile Theme Override
+
+```dart
+SettingsTile.navigation(
+  title: const Text('Premium Feature'),
+  leading: const Icon(Icons.star),
+  tileTheme: SettingsTileThemeData(
+    tileBackgroundColor: Colors.amber.shade50,
+    titleTextColor: Colors.amber.shade900,
+  ),
+)
+```
+
+### Theme from ColorScheme
+
+```dart
+SettingsList(
+  lightTheme: SettingsThemeData.fromColorScheme(ColorScheme.light()),
+  darkTheme: SettingsThemeData.fromColorScheme(ColorScheme.dark()),
+  sections: [ ... ],
+)
+```
+
+---
+
 ## Example App
 
-A full example app with multiple sections, sub-screens, theme switching, radio tiles, sliders, and more is included in the repository:
+A full example app with every feature — dropdown tiles, searchable settings, sliver integration, per-tile theming, and more:
 
 **[example/lib/main.dart](example/lib/main.dart)**
 
@@ -116,11 +201,16 @@ The original [`settings_ui`](https://github.com/yako-dev/flutter-settings-ui) pa
 | Flutter 3.x / Material 3 | Partial | Full |
 | Slider tiles | — | Built-in |
 | Radio tiles | — | Built-in |
+| Dropdown tiles | — | Built-in |
 | Expandable sections | — | Built-in |
+| Searchable settings | — | Built-in |
+| Sliver support | — | Built-in |
 | Section footers | — | Built-in |
 | Long-press callbacks | — | All tiles |
 | Custom sections | — | Built-in |
-| Theming | Limited | 14 properties, light + dark |
+| Per-tile theming | — | `SettingsTileThemeData` |
+| Animated value changes | — | Built-in |
+| Theming | Limited | 14+ properties, light + dark, `fromColorScheme` |
 | Accessibility | Basic | Semantics, touch targets, reduced-motion |
 | Desktop | Minimal | Hover, focus, pointer cursor |
 
