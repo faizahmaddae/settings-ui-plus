@@ -1,0 +1,3 @@
+tags:
+  golden:
+    description: "Golden (screenshot) tests — platform-sensitive, run locally only."
