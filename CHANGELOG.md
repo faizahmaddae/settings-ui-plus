@@ -1,3 +1,9 @@
+## 0.2.6
+
+- Added GitHub Actions CI workflow (format, analyze, test on every push/PR).
+- Added automated pub.dev publishing via OIDC on version tags.
+- Added `.github/copilot-instructions.md` for AI-assisted development.
+
 ## 0.2.5
 
 - Updated README with documentation for all new v0.2.4 features: dropdown tiles, searchable settings, sliver support, per-tile theming, animated value transitions, and `fromColorScheme` factory.

@@ -45,7 +45,7 @@ Build native-looking settings screens in Flutter with minimal effort. Automatica
 
 ```yaml
 dependencies:
-  settings_ui_plus: ^0.2.5
+  settings_ui_plus: ^0.2.6
 ```
 
 ```dart

@@ -1,6 +1,6 @@
 name: settings_ui_plus
 description: "Build native-looking settings screens in minutes. A single API that adapts to Material and Cupertino design guidelines automatically."
-version: 0.2.5
+version: 0.2.6
 repository: https://github.com/faizahmaddae/settings-ui-plus
 topics:
   - settings
