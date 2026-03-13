@@ -6,10 +6,7 @@ import 'package:settings_ui_plus/src/tiles/abstract_settings_tile.dart';
 /// Use this to embed custom content inside a [SettingsSection] alongside
 /// regular [SettingsTile]s.
 class CustomSettingsTile extends AbstractSettingsTile {
-  const CustomSettingsTile({
-    required this.child,
-    super.key,
-  });
+  const CustomSettingsTile({required this.child, super.key});
 
   final Widget child;
 

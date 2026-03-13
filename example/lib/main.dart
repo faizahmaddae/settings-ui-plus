@@ -97,10 +97,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: SettingsList(
         // Demonstrates lightTheme / darkTheme overrides
         lightTheme: const SettingsThemeData(
@@ -118,10 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: const Text('Profile'),
                 leading: const Icon(Icons.person),
                 value: const Text('Alex Johnson'),
-                onPressed: (context) => _push(
-                  context,
-                  const ProfileScreen(),
-                ),
+                onPressed: (context) => _push(context, const ProfileScreen()),
               ),
               SettingsTile.navigation(
                 title: const Text('Email'),
@@ -171,9 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: const Text('Sign Out'),
-                      content: const Text(
-                        'Are you sure you want to sign out?',
-                      ),
+                      content: const Text('Are you sure you want to sign out?'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx),
@@ -213,8 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 initialValue: _notifications,
                 // Demonstrates activeSwitchColor
                 activeSwitchColor: Colors.green,
-                onToggle: (value) =>
-                    setState(() => _notifications = value),
+                onToggle: (value) => setState(() => _notifications = value),
               ),
               SettingsTile.switchTile(
                 title: const Text('Location Services'),
@@ -260,8 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 sliderDivisions: 20,
                 value: Text('${_fontSize.round()}'),
                 description: const Text('Adjust the base font size'),
-                onSliderChanged: (value) =>
-                    setState(() => _fontSize = value),
+                onSliderChanged: (value) => setState(() => _fontSize = value),
               ),
               // Slider without icon, continuous, with custom color
               SettingsTile.sliderTile(
@@ -271,8 +261,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 sliderMax: 100,
                 value: Text('${_brightness.round()}%'),
                 sliderActiveColor: Colors.amber,
-                onSliderChanged: (value) =>
-                    setState(() => _brightness = value),
+                onSliderChanged: (value) => setState(() => _brightness = value),
               ),
               SettingsTile.navigation(
                 title: const Text('App Theme'),
@@ -327,15 +316,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   'Share anonymous usage data to improve the app',
                 ),
                 initialValue: _dataSharing,
-                onToggle: (value) =>
-                    setState(() => _dataSharing = value),
+                onToggle: (value) => setState(() => _dataSharing = value),
               ),
               SettingsTile.switchTile(
                 title: const Text('Analytics'),
                 leading: const Icon(Icons.analytics_outlined),
                 initialValue: _analytics,
-                onToggle: (value) =>
-                    setState(() => _analytics = value),
+                onToggle: (value) => setState(() => _analytics = value),
               ),
             ],
           ),
@@ -382,8 +369,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // ── CustomSettingsSection for footer branding ───────────
           CustomSettingsSection(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Center(
                 child: Text(
                   'settings_ui_plus v0.2.1',
@@ -401,9 +387,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => screen),
-    );
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
   }
 
   void _pushDetail(BuildContext context, String title, String body) {
@@ -432,15 +416,15 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                     child: Text(
                       'AJ',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color:
-                            Theme.of(context).colorScheme.onPrimaryContainer,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
@@ -587,11 +571,7 @@ class AccentColorScreen extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class DetailScreen extends StatelessWidget {
-  const DetailScreen({
-    required this.title,
-    required this.body,
-    super.key,
-  });
+  const DetailScreen({required this.title, required this.body, super.key});
 
   final String title;
   final String body;
@@ -602,10 +582,7 @@ class DetailScreen extends StatelessWidget {
       appBar: AppBar(title: Text(title)),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Text(
-          body,
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+        child: Text(body, style: Theme.of(context).textTheme.bodyLarge),
       ),
     );
   }

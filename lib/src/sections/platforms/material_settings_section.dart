@@ -77,43 +77,42 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (widget.title != null)
-        GestureDetector(
-          onTap: widget.expandable ? toggleExpanded : null,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsetsDirectional.only(
-              top: 24 * scaleFactor,
-              bottom: 10 * scaleFactor,
-              start: 24,
-              end: 24,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: DefaultTextStyle(
-                    style: theme.themeData.sectionTitleTextStyle?.copyWith(
-                          color: theme.themeData.titleTextColor,
-                        ) ??
-                        TextStyle(
-                          color: theme.themeData.titleTextColor,
-                        ),
-                    child: widget.title!,
-                  ),
-                ),
-                if (widget.expandable)
-                  AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0.0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      Icons.expand_more,
-                      color: theme.themeData.titleTextColor,
-                      size: 20,
+          GestureDetector(
+            onTap: widget.expandable ? toggleExpanded : null,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                top: 24 * scaleFactor,
+                bottom: 10 * scaleFactor,
+                start: 24,
+                end: 24,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: DefaultTextStyle(
+                      style:
+                          theme.themeData.sectionTitleTextStyle?.copyWith(
+                            color: theme.themeData.titleTextColor,
+                          ) ??
+                          TextStyle(color: theme.themeData.titleTextColor),
+                      child: widget.title!,
                     ),
                   ),
-              ],
+                  if (widget.expandable)
+                    AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(
+                        Icons.expand_more,
+                        color: theme.themeData.titleTextColor,
+                        size: 20,
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
         SizeTransition(
           sizeFactor: expandAnimation,
           child: Container(
@@ -165,7 +164,8 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
                   children: [
                     Expanded(
                       child: DefaultTextStyle(
-                        style: theme.themeData.sectionTitleTextStyle?.copyWith(
+                        style:
+                            theme.themeData.sectionTitleTextStyle?.copyWith(
                               color: theme.themeData.titleTextColor,
                             ) ??
                             TextStyle(
@@ -193,7 +193,8 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
             sizeFactor: expandAnimation,
             child: Card(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
+              ),
               elevation: 4,
               color: theme.themeData.settingsSectionBackground,
               child: _buildTileList(showSeparators: true),

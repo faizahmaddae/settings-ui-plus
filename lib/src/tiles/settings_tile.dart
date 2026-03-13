@@ -25,17 +25,17 @@ class SettingsTile extends AbstractSettingsTile {
     this.onLongPress,
     this.enabled = true,
     super.key,
-  })  : onToggle = null,
-        initialValue = null,
-        activeSwitchColor = null,
-        selected = false,
-        sliderValue = null,
-        sliderMin = 0.0,
-        sliderMax = 1.0,
-        sliderDivisions = null,
-        onSliderChanged = null,
-        sliderActiveColor = null,
-        tileType = SettingsTileType.simpleTile;
+  }) : onToggle = null,
+       initialValue = null,
+       activeSwitchColor = null,
+       selected = false,
+       sliderValue = null,
+       sliderMin = 0.0,
+       sliderMax = 1.0,
+       sliderDivisions = null,
+       onSliderChanged = null,
+       sliderActiveColor = null,
+       tileType = SettingsTileType.simpleTile;
 
   const SettingsTile.navigation({
     this.leading,
@@ -47,17 +47,17 @@ class SettingsTile extends AbstractSettingsTile {
     this.onLongPress,
     this.enabled = true,
     super.key,
-  })  : onToggle = null,
-        initialValue = null,
-        activeSwitchColor = null,
-        selected = false,
-        sliderValue = null,
-        sliderMin = 0.0,
-        sliderMax = 1.0,
-        sliderDivisions = null,
-        onSliderChanged = null,
-        sliderActiveColor = null,
-        tileType = SettingsTileType.navigationTile;
+  }) : onToggle = null,
+       initialValue = null,
+       activeSwitchColor = null,
+       selected = false,
+       sliderValue = null,
+       sliderMin = 0.0,
+       sliderMax = 1.0,
+       sliderDivisions = null,
+       onSliderChanged = null,
+       sliderActiveColor = null,
+       tileType = SettingsTileType.navigationTile;
 
   const SettingsTile.switchTile({
     required this.initialValue,
@@ -71,15 +71,15 @@ class SettingsTile extends AbstractSettingsTile {
     this.onLongPress,
     this.enabled = true,
     super.key,
-  })  : value = null,
-        selected = false,
-        sliderValue = null,
-        sliderMin = 0.0,
-        sliderMax = 1.0,
-        sliderDivisions = null,
-        onSliderChanged = null,
-        sliderActiveColor = null,
-        tileType = SettingsTileType.switchTile;
+  }) : value = null,
+       selected = false,
+       sliderValue = null,
+       sliderMin = 0.0,
+       sliderMax = 1.0,
+       sliderDivisions = null,
+       onSliderChanged = null,
+       sliderActiveColor = null,
+       tileType = SettingsTileType.switchTile;
 
   /// Creates a radio-style tile that shows a checkmark when [selected] is true.
   const SettingsTile.radioTile({
@@ -92,17 +92,17 @@ class SettingsTile extends AbstractSettingsTile {
     this.onLongPress,
     this.enabled = true,
     super.key,
-  })  : onToggle = null,
-        initialValue = null,
-        activeSwitchColor = null,
-        value = null,
-        sliderValue = null,
-        sliderMin = 0.0,
-        sliderMax = 1.0,
-        sliderDivisions = null,
-        onSliderChanged = null,
-        sliderActiveColor = null,
-        tileType = SettingsTileType.simpleTile;
+  }) : onToggle = null,
+       initialValue = null,
+       activeSwitchColor = null,
+       value = null,
+       sliderValue = null,
+       sliderMin = 0.0,
+       sliderMax = 1.0,
+       sliderDivisions = null,
+       onSliderChanged = null,
+       sliderActiveColor = null,
+       tileType = SettingsTileType.simpleTile;
 
   /// Creates a tile with an inline slider control.
   ///
@@ -125,11 +125,11 @@ class SettingsTile extends AbstractSettingsTile {
     this.onLongPress,
     this.enabled = true,
     super.key,
-  })  : onToggle = null,
-        initialValue = null,
-        activeSwitchColor = null,
-        selected = false,
-        tileType = SettingsTileType.sliderTile;
+  }) : onToggle = null,
+       initialValue = null,
+       activeSwitchColor = null,
+       selected = false,
+       tileType = SettingsTileType.sliderTile;
 
   /// The widget at the beginning of the tile
   final Widget? leading;

@@ -91,10 +91,10 @@ class ThemeProvider {
     required DevicePlatform platform,
     required Brightness brightness,
   }) {
-    return _cache.putIfAbsent(
-      (platform, brightness),
-      () => _buildTheme(platform, brightness),
-    );
+    return _cache.putIfAbsent((
+      platform,
+      brightness,
+    ), () => _buildTheme(platform, brightness));
   }
 
   static SettingsThemeData _buildTheme(
@@ -122,10 +122,12 @@ class ThemeProvider {
       settingsListBackground: isLight
           ? _AndroidColors.lightListBackground
           : _AndroidColors.darkListBackground,
-      titleTextColor:
-          isLight ? _AndroidColors.lightTitle : _AndroidColors.darkTitle,
-      settingsTileTextColor:
-          isLight ? _AndroidColors.lightTileText : _AndroidColors.darkTileText,
+      titleTextColor: isLight
+          ? _AndroidColors.lightTitle
+          : _AndroidColors.darkTitle,
+      settingsTileTextColor: isLight
+          ? _AndroidColors.lightTileText
+          : _AndroidColors.darkTileText,
       tileHighlightColor: isLight
           ? _AndroidColors.lightTileHighlight
           : _AndroidColors.darkTileHighlight,
@@ -160,12 +162,11 @@ class ThemeProvider {
       settingsSectionBackground: isLight
           ? _IOSColors.lightSectionBackground
           : _IOSColors.darkSectionBackground,
-      titleTextColor:
-          isLight ? _IOSColors.lightTitle : _IOSColors.darkTitle,
-      settingsTileTextColor:
-          isLight ? _IOSColors.lightTileText : _IOSColors.darkTileText,
-      dividerColor:
-          isLight ? _IOSColors.lightDivider : _IOSColors.darkDivider,
+      titleTextColor: isLight ? _IOSColors.lightTitle : _IOSColors.darkTitle,
+      settingsTileTextColor: isLight
+          ? _IOSColors.lightTileText
+          : _IOSColors.darkTileText,
+      dividerColor: isLight ? _IOSColors.lightDivider : _IOSColors.darkDivider,
       trailingTextColor: isLight
           ? _IOSColors.lightTrailingText
           : _IOSColors.darkTrailingText,
@@ -173,8 +174,9 @@ class ThemeProvider {
           ? _IOSColors.lightTileHighlight
           : _IOSColors.darkTileHighlight,
       leadingIconsColor: _IOSColors.leadingIcons,
-      tileDescriptionTextColor:
-          isLight ? _IOSColors.lightTitle : _IOSColors.darkTitle,
+      tileDescriptionTextColor: isLight
+          ? _IOSColors.lightTitle
+          : _IOSColors.darkTitle,
       inactiveTitleColor: _IOSColors.inactive,
       inactiveSubtitleColor: _IOSColors.inactive,
     );
@@ -190,10 +192,10 @@ class ThemeProvider {
       settingsSectionBackground: isLight
           ? _WebColors.lightSectionBackground
           : _WebColors.darkSectionBackground,
-      titleTextColor:
-          isLight ? _WebColors.lightTitle : _WebColors.darkTitle,
-      settingsTileTextColor:
-          isLight ? _WebColors.lightTileText : _WebColors.darkTileText,
+      titleTextColor: isLight ? _WebColors.lightTitle : _WebColors.darkTitle,
+      settingsTileTextColor: isLight
+          ? _WebColors.lightTileText
+          : _WebColors.darkTileText,
       tileHighlightColor: isLight
           ? _WebColors.lightTileHighlight
           : _WebColors.darkTileHighlight,

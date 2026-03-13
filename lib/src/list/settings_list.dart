@@ -58,14 +58,16 @@ class SettingsList extends StatelessWidget {
     final isMaterialPlatform =
         platform != DevicePlatform.iOS && platform != DevicePlatform.macOS;
 
-    final themeData = ThemeProvider.getTheme(
-      platform: platform,
-      brightness: brightness,
-    ).copyWith(
-      titleTextColor: isMaterialPlatform
-          ? Theme.of(context).colorScheme.primary
-          : null,
-    ).merge(theme: brightness == Brightness.dark ? darkTheme : lightTheme);
+    final themeData =
+        ThemeProvider.getTheme(platform: platform, brightness: brightness)
+            .copyWith(
+              titleTextColor: isMaterialPlatform
+                  ? Theme.of(context).colorScheme.primary
+                  : null,
+            )
+            .merge(
+              theme: brightness == Brightness.dark ? darkTheme : lightTheme,
+            );
 
     return ColoredBox(
       color: themeData.settingsListBackground ?? Colors.transparent,
@@ -90,7 +92,9 @@ class SettingsList extends StatelessWidget {
   }
 
   EdgeInsets calculateDefaultPadding(
-      DevicePlatform platform, BuildContext context) {
+    DevicePlatform platform,
+    BuildContext context,
+  ) {
     final isWeb = platform == DevicePlatform.web;
     final width = MediaQuery.sizeOf(context).width;
 
@@ -107,7 +111,8 @@ class SettingsList extends StatelessWidget {
 
   Brightness calculateBrightness(BuildContext context) {
     final materialBrightness = Theme.of(context).brightness;
-    final cupertinoBrightness = CupertinoTheme.of(context).brightness ??
+    final cupertinoBrightness =
+        CupertinoTheme.of(context).brightness ??
         MediaQuery.of(context).platformBrightness;
 
     switch (applicationType) {

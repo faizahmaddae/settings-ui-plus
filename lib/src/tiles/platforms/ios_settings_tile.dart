@@ -60,35 +60,34 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
 
     return Semantics(
       enabled: widget.enabled,
-      toggled:
-          widget.tileType == SettingsTileType.switchTile
-              ? widget.initialValue
-              : null,
+      toggled: widget.tileType == SettingsTileType.switchTile
+          ? widget.initialValue
+          : null,
       button: widget.tileType != SettingsTileType.switchTile,
       hint: widget.tileType == SettingsTileType.switchTile
           ? (widget.onToggle != null ? 'Double-tap to toggle' : null)
           : widget.tileType == SettingsTileType.sliderTile
-              ? (widget.onSliderChanged != null || widget.onPressed != null
-                  ? 'Adjust with slider'
-                  : null)
-              : (widget.onPressed != null ? 'Double-tap to activate' : null),
+          ? (widget.onSliderChanged != null || widget.onPressed != null
+                ? 'Adjust with slider'
+                : null)
+          : (widget.onPressed != null ? 'Double-tap to activate' : null),
       child: Opacity(
         opacity: widget.enabled ? 1.0 : 0.5,
         child: IgnorePointer(
           ignoring: !widget.enabled,
           child: Column(
-          children: [
-            buildTitle(
-              context: context,
-              theme: theme,
-              additionalInfo: additionalInfo,
-            ),
-            if (widget.description != null)
-              buildDescription(
+            children: [
+              buildTitle(
                 context: context,
                 theme: theme,
                 additionalInfo: additionalInfo,
               ),
+              if (widget.description != null)
+                buildDescription(
+                  context: context,
+                  theme: theme,
+                  additionalInfo: additionalInfo,
+                ),
             ],
           ),
         ),
@@ -103,10 +102,7 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
   }) {
     Widget content = buildTileContent(context, theme, additionalInfo);
     if (theme.platform != DevicePlatform.iOS) {
-      content = Material(
-        color: Colors.transparent,
-        child: content,
-      );
+      content = Material(color: Colors.transparent, child: content);
     }
 
     return ClipRRect(
@@ -137,11 +133,10 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
         top: 8 * scaleFactor,
         bottom: additionalInfo.needToShowDivider ? 24 : 8 * scaleFactor,
       ),
-      decoration: BoxDecoration(
-        color: theme.themeData.settingsListBackground,
-      ),
+      decoration: BoxDecoration(color: theme.themeData.settingsListBackground),
       child: DefaultTextStyle(
-        style: theme.themeData.descriptionTextStyle?.copyWith(
+        style:
+            theme.themeData.descriptionTextStyle?.copyWith(
               color: widget.enabled
                   ? theme.themeData.tileDescriptionTextColor
                   : theme.themeData.inactiveTitleColor,
@@ -172,9 +167,7 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
           CupertinoSwitch(
             value: widget.initialValue ?? false,
             onChanged: widget.onToggle,
-            activeTrackColor: widget.enabled
-                ? widget.activeSwitchColor
-                : null,
+            activeTrackColor: widget.enabled ? widget.activeSwitchColor : null,
           ),
         if ((widget.tileType == SettingsTileType.navigationTile ||
                 widget.tileType == SettingsTileType.sliderTile) &&
@@ -192,8 +185,9 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 6, end: 2),
             child: IconTheme(
-              data: IconTheme.of(context)
-                  .copyWith(color: theme.themeData.leadingIconsColor),
+              data: IconTheme.of(
+                context,
+              ).copyWith(color: theme.themeData.leadingIconsColor),
               child: Icon(
                 CupertinoIcons.chevron_forward,
                 size: 14 * scaleFactor,
@@ -294,7 +288,8 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                         children: [
                           Expanded(
                             child: DefaultTextStyle(
-                              style: theme.themeData.titleTextStyle?.copyWith(
+                              style:
+                                  theme.themeData.titleTextStyle?.copyWith(
                                     color: widget.enabled
                                         ? theme.themeData.settingsTileTextColor
                                         : theme.themeData.inactiveTitleColor,
@@ -312,7 +307,9 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                           ),
                           if (widget.value != null)
                             Padding(
-                              padding: const EdgeInsetsDirectional.only(start: 8),
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 8,
+                              ),
                               child: DefaultTextStyle(
                                 style: TextStyle(
                                   color: widget.enabled
@@ -325,7 +322,9 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                             ),
                           if (widget.trailing != null)
                             Padding(
-                              padding: const EdgeInsetsDirectional.only(start: 8),
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 8,
+                              ),
                               child: widget.trailing!,
                             ),
                         ],
@@ -339,7 +338,8 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                           top: 2 * scaleFactor,
                         ),
                         child: DefaultTextStyle(
-                          style: theme.themeData.descriptionTextStyle?.copyWith(
+                          style:
+                              theme.themeData.descriptionTextStyle?.copyWith(
                                 color: widget.enabled
                                     ? theme.themeData.tileDescriptionTextColor
                                     : theme.themeData.inactiveTitleColor,
@@ -368,8 +368,9 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                           min: widget.sliderMin,
                           max: widget.sliderMax,
                           divisions: widget.sliderDivisions,
-                          onChanged:
-                              widget.enabled ? widget.onSliderChanged : null,
+                          onChanged: widget.enabled
+                              ? widget.onSliderChanged
+                              : null,
                           activeColor: widget.sliderActiveColor,
                         ),
                       ),
@@ -421,73 +422,78 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
       child: Opacity(
         opacity: isPressed ? 0.7 : 1.0,
         child: Container(
-        constraints: const BoxConstraints(minHeight: 44),
-        color: theme.themeData.settingsSectionBackground,
-        padding: const EdgeInsetsDirectional.only(start: 16),
-        child: Row(
-          children: [
-            if (widget.leading != null)
-              Padding(
-                padding: const EdgeInsetsDirectional.only(end: 14.0),
-                child: IconTheme.merge(
-                  data: IconThemeData(
-                    color: widget.enabled
-                        ? theme.themeData.leadingIconsColor
-                        : theme.themeData.inactiveTitleColor,
+          constraints: const BoxConstraints(minHeight: 44),
+          color: theme.themeData.settingsSectionBackground,
+          padding: const EdgeInsetsDirectional.only(start: 16),
+          child: Row(
+            children: [
+              if (widget.leading != null)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 14.0),
+                  child: IconTheme.merge(
+                    data: IconThemeData(
+                      color: widget.enabled
+                          ? theme.themeData.leadingIconsColor
+                          : theme.themeData.inactiveTitleColor,
+                    ),
+                    child: widget.leading!,
                   ),
-                  child: widget.leading!,
                 ),
-              ),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.only(
-                              top: 12 * scaleFactor,
-                              bottom: 12 * scaleFactor,
-                            ),
-                            child: DefaultTextStyle(
-                              style: theme.themeData.titleTextStyle?.copyWith(
-                                    color: widget.enabled
-                                        ? theme.themeData.settingsTileTextColor
-                                        : theme.themeData.inactiveTitleColor,
-                                  ) ??
-                                  TextStyle(
-                                    color: widget.enabled
-                                        ? theme.themeData.settingsTileTextColor
-                                        : theme.themeData.inactiveTitleColor,
-                                    fontSize: 17,
-                                  ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              child: widget.title ?? const SizedBox.shrink(),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 16),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.only(
+                                top: 12 * scaleFactor,
+                                bottom: 12 * scaleFactor,
+                              ),
+                              child: DefaultTextStyle(
+                                style:
+                                    theme.themeData.titleTextStyle?.copyWith(
+                                      color: widget.enabled
+                                          ? theme
+                                                .themeData
+                                                .settingsTileTextColor
+                                          : theme.themeData.inactiveTitleColor,
+                                    ) ??
+                                    TextStyle(
+                                      color: widget.enabled
+                                          ? theme
+                                                .themeData
+                                                .settingsTileTextColor
+                                          : theme.themeData.inactiveTitleColor,
+                                      fontSize: 17,
+                                    ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                child: widget.title ?? const SizedBox.shrink(),
+                              ),
                             ),
                           ),
-                        ),
-                        buildTrailing(context: context, theme: theme),
-                      ],
+                          buildTrailing(context: context, theme: theme),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (widget.description == null &&
-                      additionalInfo.needToShowDivider)
-                    Divider(
-                      height: 0,
-                      thickness: 0.5,
-                      color: theme.themeData.dividerColor,
-                    ),
-                ],
+                    if (widget.description == null &&
+                        additionalInfo.needToShowDivider)
+                      Divider(
+                        height: 0,
+                        thickness: 0.5,
+                        color: theme.themeData.dividerColor,
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -515,8 +521,10 @@ class IOSSettingsTileAdditionalInfo extends InheritedWidget {
   static IOSSettingsTileAdditionalInfo of(BuildContext context) {
     final IOSSettingsTileAdditionalInfo? result = context
         .dependOnInheritedWidgetOfExactType<IOSSettingsTileAdditionalInfo>();
-    assert(result != null,
-        'IOSSettingsTileAdditionalInfo not found. Ensure the tile is placed within an IOSSettingsSection.');
+    assert(
+      result != null,
+      'IOSSettingsTileAdditionalInfo not found. Ensure the tile is placed within an IOSSettingsSection.',
+    );
     return result!;
   }
 }

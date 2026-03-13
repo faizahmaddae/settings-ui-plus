@@ -6,10 +6,7 @@ import 'package:settings_ui_plus/src/sections/abstract_settings_section.dart';
 /// Use this to embed custom content (banners, ads, info cards) inside a
 /// [SettingsList] alongside regular [SettingsSection]s.
 class CustomSettingsSection extends AbstractSettingsSection {
-  const CustomSettingsSection({
-    required this.child,
-    super.key,
-  });
+  const CustomSettingsSection({required this.child, super.key});
 
   final Widget child;
 

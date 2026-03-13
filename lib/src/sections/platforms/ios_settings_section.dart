@@ -54,12 +54,13 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
 
     final theme = SettingsTheme.of(context);
     final lastTile = widget.tiles.last;
-    final isLastNonDescriptive = lastTile is SettingsTile &&
-        lastTile.description == null;
+    final isLastNonDescriptive =
+        lastTile is SettingsTile && lastTile.description == null;
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
 
     return Padding(
-      padding: widget.margin ??
+      padding:
+          widget.margin ??
           EdgeInsetsDirectional.only(
             top: 14.0 * scaleFactor,
             bottom: isLastNonDescriptive ? 21 * scaleFactor : 10 * scaleFactor,
@@ -82,7 +83,8 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
                   children: [
                     Expanded(
                       child: DefaultTextStyle(
-                        style: theme.themeData.sectionTitleTextStyle?.copyWith(
+                        style:
+                            theme.themeData.sectionTitleTextStyle?.copyWith(
                               color: theme.themeData.titleTextColor,
                             ) ??
                             TextStyle(
@@ -106,10 +108,7 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
                 ),
               ),
             ),
-          SizeTransition(
-            sizeFactor: expandAnimation,
-            child: buildTileList(),
-          ),
+          SizeTransition(sizeFactor: expandAnimation, child: buildTileList()),
           if (widget.footer != null)
             Padding(
               padding: EdgeInsetsDirectional.only(
@@ -144,7 +143,8 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
         if (index == 0 ||
             (index > 0 &&
                 widget.tiles[index - 1] is SettingsTile &&
-                (widget.tiles[index - 1] as SettingsTile).description != null)) {
+                (widget.tiles[index - 1] as SettingsTile).description !=
+                    null)) {
           enableTop = true;
         }
 

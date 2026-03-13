@@ -25,9 +25,12 @@ class SettingsTheme extends InheritedWidget {
       themeData != old.themeData || platform != old.platform;
 
   static SettingsTheme of(BuildContext context) {
-    final SettingsTheme? result =
-        context.dependOnInheritedWidgetOfExactType<SettingsTheme>();
-    assert(result != null, 'No SettingsTheme found. Wrap your widget tree with a SettingsList.');
+    final SettingsTheme? result = context
+        .dependOnInheritedWidgetOfExactType<SettingsTheme>();
+    assert(
+      result != null,
+      'No SettingsTheme found. Wrap your widget tree with a SettingsList.',
+    );
     return result!;
   }
 }
@@ -75,9 +78,7 @@ class SettingsThemeData {
   /// Custom text style for section titles. Overrides the default platform style.
   final TextStyle? sectionTitleTextStyle;
 
-  SettingsThemeData merge({
-    SettingsThemeData? theme,
-  }) {
+  SettingsThemeData merge({SettingsThemeData? theme}) {
     if (theme == null) return this;
 
     return copyWith(
@@ -159,19 +160,19 @@ class SettingsThemeData {
 
   @override
   int get hashCode => Object.hash(
-        settingsListBackground,
-        trailingTextColor,
-        leadingIconsColor,
-        settingsSectionBackground,
-        dividerColor,
-        tileDescriptionTextColor,
-        tileHighlightColor,
-        titleTextColor,
-        settingsTileTextColor,
-        inactiveTitleColor,
-        inactiveSubtitleColor,
-        titleTextStyle,
-        descriptionTextStyle,
-        sectionTitleTextStyle,
-      );
+    settingsListBackground,
+    trailingTextColor,
+    leadingIconsColor,
+    settingsSectionBackground,
+    dividerColor,
+    tileDescriptionTextColor,
+    tileHighlightColor,
+    titleTextColor,
+    settingsTileTextColor,
+    inactiveTitleColor,
+    inactiveSubtitleColor,
+    titleTextStyle,
+    descriptionTextStyle,
+    sectionTitleTextStyle,
+  );
 }
