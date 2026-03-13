@@ -1,4 +1,5 @@
-export 'package:settings_ui_plus/src/list/settings_list.dart';
+export 'package:settings_ui_plus/src/list/settings_list.dart'
+    show ApplicationType, SettingsList;
 export 'package:settings_ui_plus/src/sections/abstract_settings_section.dart';
 export 'package:settings_ui_plus/src/sections/custom_settings_section.dart';
 export 'package:settings_ui_plus/src/sections/settings_section.dart';

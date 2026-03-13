@@ -17,6 +17,12 @@ enum ApplicationType {
   both,
 }
 
+/// A scrollable list of [SettingsSection]s that automatically adapts its
+/// appearance to the current platform (Material or Cupertino).
+///
+/// Wrap your sections in this widget and optionally supply [lightTheme]/
+/// [darkTheme] overrides, a forced [platform], or [applicationType] to
+/// control brightness resolution.
 class SettingsList extends StatelessWidget {
   const SettingsList({
     required this.sections,
@@ -55,20 +61,21 @@ class SettingsList extends StatelessWidget {
     return ColoredBox(
       color: themeData.settingsListBackground ?? Colors.transparent,
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery.sizeOf(context).width,
         child: SettingsTheme(
-        themeData: themeData,
-        platform: platform,
-        child: ListView.builder(
-          physics: physics,
-          shrinkWrap: shrinkWrap,
-          itemCount: sections.length,
-          padding: contentPadding ?? calculateDefaultPadding(platform, context),
-          itemBuilder: (BuildContext context, int index) {
-            return sections[index];
-          },
+          themeData: themeData,
+          platform: platform,
+          child: ListView.builder(
+            physics: physics,
+            shrinkWrap: shrinkWrap,
+            itemCount: sections.length,
+            padding:
+                contentPadding ?? calculateDefaultPadding(platform, context),
+            itemBuilder: (BuildContext context, int index) {
+              return sections[index];
+            },
+          ),
         ),
-      ),
       ),
     );
   }
@@ -76,7 +83,7 @@ class SettingsList extends StatelessWidget {
   EdgeInsets calculateDefaultPadding(
       DevicePlatform platform, BuildContext context) {
     final isWeb = platform == DevicePlatform.web;
-    final width = MediaQuery.of(context).size.width;
+    final width = MediaQuery.sizeOf(context).width;
 
     if (width > 810) {
       final padding = (width - 810) / 2;

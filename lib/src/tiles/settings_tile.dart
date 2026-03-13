@@ -5,8 +5,15 @@ import 'package:settings_ui_plus/src/tiles/platforms/material_settings_tile.dart
 import 'package:settings_ui_plus/src/utils/platform_utils.dart';
 import 'package:settings_ui_plus/src/utils/settings_theme.dart';
 
-enum SettingsTileType { simpleTile, switchTile, navigationTile }
+/// The visual type of a [SettingsTile].
+enum SettingsTileType { simpleTile, switchTile, navigationTile, sliderTile }
 
+/// A single settings row that adapts to Material or Cupertino styling.
+///
+/// Use the named constructors for common variants:
+/// - [SettingsTile.navigation] — shows a trailing chevron.
+/// - [SettingsTile.switchTile] — shows a toggle switch.
+/// - [SettingsTile.radioTile] — shows a checkmark when [selected].
 class SettingsTile extends AbstractSettingsTile {
   const SettingsTile({
     this.leading,
@@ -15,11 +22,19 @@ class SettingsTile extends AbstractSettingsTile {
     required this.title,
     this.description,
     this.onPressed,
+    this.onLongPress,
     this.enabled = true,
     super.key,
   })  : onToggle = null,
         initialValue = null,
         activeSwitchColor = null,
+        selected = false,
+        sliderValue = null,
+        sliderMin = 0.0,
+        sliderMax = 1.0,
+        sliderDivisions = null,
+        onSliderChanged = null,
+        sliderActiveColor = null,
         tileType = SettingsTileType.simpleTile;
 
   const SettingsTile.navigation({
@@ -29,11 +44,19 @@ class SettingsTile extends AbstractSettingsTile {
     required this.title,
     this.description,
     this.onPressed,
+    this.onLongPress,
     this.enabled = true,
     super.key,
   })  : onToggle = null,
         initialValue = null,
         activeSwitchColor = null,
+        selected = false,
+        sliderValue = null,
+        sliderMin = 0.0,
+        sliderMax = 1.0,
+        sliderDivisions = null,
+        onSliderChanged = null,
+        sliderActiveColor = null,
         tileType = SettingsTileType.navigationTile;
 
   const SettingsTile.switchTile({
@@ -45,10 +68,68 @@ class SettingsTile extends AbstractSettingsTile {
     required this.title,
     this.description,
     this.onPressed,
+    this.onLongPress,
     this.enabled = true,
     super.key,
   })  : value = null,
+        selected = false,
+        sliderValue = null,
+        sliderMin = 0.0,
+        sliderMax = 1.0,
+        sliderDivisions = null,
+        onSliderChanged = null,
+        sliderActiveColor = null,
         tileType = SettingsTileType.switchTile;
+
+  /// Creates a radio-style tile that shows a checkmark when [selected] is true.
+  const SettingsTile.radioTile({
+    required this.selected,
+    this.leading,
+    this.trailing,
+    required this.title,
+    this.description,
+    this.onPressed,
+    this.onLongPress,
+    this.enabled = true,
+    super.key,
+  })  : onToggle = null,
+        initialValue = null,
+        activeSwitchColor = null,
+        value = null,
+        sliderValue = null,
+        sliderMin = 0.0,
+        sliderMax = 1.0,
+        sliderDivisions = null,
+        onSliderChanged = null,
+        sliderActiveColor = null,
+        tileType = SettingsTileType.simpleTile;
+
+  /// Creates a tile with an inline slider control.
+  ///
+  /// The title is displayed at the start and the slider fills the remaining
+  /// space. Optionally pass [value] to show a label (e.g. the current value)
+  /// between the title and the slider.
+  const SettingsTile.sliderTile({
+    required this.sliderValue,
+    required this.onSliderChanged,
+    this.sliderMin = 0.0,
+    this.sliderMax = 1.0,
+    this.sliderDivisions,
+    this.sliderActiveColor,
+    this.leading,
+    this.trailing,
+    this.value,
+    required this.title,
+    this.description,
+    this.onPressed,
+    this.onLongPress,
+    this.enabled = true,
+    super.key,
+  })  : onToggle = null,
+        initialValue = null,
+        activeSwitchColor = null,
+        selected = false,
+        tileType = SettingsTileType.sliderTile;
 
   /// The widget at the beginning of the tile
   final Widget? leading;
@@ -65,12 +146,36 @@ class SettingsTile extends AbstractSettingsTile {
   /// A function that is called by tap on a tile
   final Function(BuildContext context)? onPressed;
 
+  /// A function that is called by long-press on a tile
+  final Function(BuildContext context)? onLongPress;
+
   final Color? activeSwitchColor;
   final Widget? value;
   final Function(bool value)? onToggle;
   final SettingsTileType tileType;
   final bool? initialValue;
   final bool enabled;
+
+  /// Whether this tile is the selected option in a radio group.
+  final bool selected;
+
+  /// Current slider value. Required for [SettingsTile.sliderTile].
+  final double? sliderValue;
+
+  /// Minimum slider value (defaults to 0.0).
+  final double sliderMin;
+
+  /// Maximum slider value (defaults to 1.0).
+  final double sliderMax;
+
+  /// Number of discrete divisions for the slider.
+  final int? sliderDivisions;
+
+  /// Called when the slider value changes.
+  final ValueChanged<double>? onSliderChanged;
+
+  /// Active track / thumb color for the slider.
+  final Color? sliderActiveColor;
 
   @override
   Widget build(BuildContext context) {
@@ -80,10 +185,12 @@ class SettingsTile extends AbstractSettingsTile {
       case DevicePlatform.android:
       case DevicePlatform.fuchsia:
       case DevicePlatform.linux:
+      case DevicePlatform.windows:
       case DevicePlatform.web:
         return MaterialSettingsTile(
           description: description,
           onPressed: onPressed,
+          onLongPress: onLongPress,
           onToggle: onToggle,
           tileType: tileType,
           value: value,
@@ -93,13 +200,20 @@ class SettingsTile extends AbstractSettingsTile {
           activeSwitchColor: activeSwitchColor,
           initialValue: initialValue ?? false,
           trailing: trailing,
+          selected: selected,
+          sliderValue: sliderValue,
+          sliderMin: sliderMin,
+          sliderMax: sliderMax,
+          sliderDivisions: sliderDivisions,
+          onSliderChanged: onSliderChanged,
+          sliderActiveColor: sliderActiveColor,
         );
       case DevicePlatform.iOS:
       case DevicePlatform.macOS:
-      case DevicePlatform.windows:
         return IOSSettingsTile(
           description: description,
           onPressed: onPressed,
+          onLongPress: onLongPress,
           onToggle: onToggle,
           tileType: tileType,
           value: value,
@@ -109,6 +223,13 @@ class SettingsTile extends AbstractSettingsTile {
           enabled: enabled,
           activeSwitchColor: activeSwitchColor,
           initialValue: initialValue ?? false,
+          selected: selected,
+          sliderValue: sliderValue,
+          sliderMin: sliderMin,
+          sliderMax: sliderMax,
+          sliderDivisions: sliderDivisions,
+          onSliderChanged: onSliderChanged,
+          sliderActiveColor: sliderActiveColor,
         );
     }
   }

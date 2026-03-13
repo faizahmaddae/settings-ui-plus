@@ -37,7 +37,7 @@ abstract final class _IOSColors {
   static const darkSectionBackground = Color.fromARGB(255, 28, 28, 30);
 
   static const lightTitle = Color.fromRGBO(109, 109, 114, 1);
-  static const darkTitle = CupertinoColors.systemGrey;
+  static const darkTitle = Color.fromARGB(255, 152, 152, 159);
 
   static const lightDivider = Color.fromARGB(255, 238, 238, 238);
   static const darkDivider = Color.fromARGB(255, 40, 40, 42);
@@ -85,18 +85,30 @@ abstract final class _WebColors {
 }
 
 class ThemeProvider {
+  static final Map<(DevicePlatform, Brightness), SettingsThemeData> _cache = {};
+
   static SettingsThemeData getTheme({
     required DevicePlatform platform,
     required Brightness brightness,
   }) {
+    return _cache.putIfAbsent(
+      (platform, brightness),
+      () => _buildTheme(platform, brightness),
+    );
+  }
+
+  static SettingsThemeData _buildTheme(
+    DevicePlatform platform,
+    Brightness brightness,
+  ) {
     switch (platform) {
       case DevicePlatform.android:
       case DevicePlatform.fuchsia:
       case DevicePlatform.linux:
+      case DevicePlatform.windows:
         return _androidTheme(brightness);
       case DevicePlatform.iOS:
       case DevicePlatform.macOS:
-      case DevicePlatform.windows:
         return _iosTheme(brightness);
       case DevicePlatform.web:
         return _webTheme(brightness);
@@ -123,6 +135,12 @@ class ThemeProvider {
       leadingIconsColor: isLight
           ? _AndroidColors.lightLeadingIcons
           : _AndroidColors.darkLeadingIcons,
+      settingsSectionBackground: isLight
+          ? const Color.fromARGB(255, 255, 255, 255)
+          : const Color.fromARGB(255, 43, 43, 43),
+      dividerColor: isLight
+          ? const Color.fromARGB(255, 220, 220, 220)
+          : const Color.fromARGB(255, 60, 60, 60),
       inactiveTitleColor: isLight
           ? _AndroidColors.lightInactiveTitle
           : _AndroidColors.darkInactiveTitle,
@@ -155,6 +173,8 @@ class ThemeProvider {
           ? _IOSColors.lightTileHighlight
           : _IOSColors.darkTileHighlight,
       leadingIconsColor: _IOSColors.leadingIcons,
+      tileDescriptionTextColor:
+          isLight ? _IOSColors.lightTitle : _IOSColors.darkTitle,
       inactiveTitleColor: _IOSColors.inactive,
       inactiveSubtitleColor: _IOSColors.inactive,
     );

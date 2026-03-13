@@ -9,12 +9,20 @@ class IOSSettingsTile extends StatefulWidget {
     required this.title,
     required this.description,
     required this.onPressed,
+    required this.onLongPress,
     required this.onToggle,
     required this.value,
     required this.initialValue,
     required this.activeSwitchColor,
     required this.enabled,
     required this.trailing,
+    this.selected = false,
+    this.sliderValue,
+    this.sliderMin = 0.0,
+    this.sliderMax = 1.0,
+    this.sliderDivisions,
+    this.onSliderChanged,
+    this.sliderActiveColor,
     super.key,
   });
 
@@ -23,12 +31,20 @@ class IOSSettingsTile extends StatefulWidget {
   final Widget? title;
   final Widget? description;
   final Function(BuildContext context)? onPressed;
+  final Function(BuildContext context)? onLongPress;
   final Function(bool value)? onToggle;
   final Widget? value;
   final bool? initialValue;
   final bool enabled;
   final Color? activeSwitchColor;
   final Widget? trailing;
+  final bool selected;
+  final double? sliderValue;
+  final double sliderMin;
+  final double sliderMax;
+  final int? sliderDivisions;
+  final ValueChanged<double>? onSliderChanged;
+  final Color? sliderActiveColor;
 
   @override
   State<IOSSettingsTile> createState() => _IOSSettingsTileState();
@@ -42,22 +58,34 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     final additionalInfo = IOSSettingsTileAdditionalInfo.of(context);
     final theme = SettingsTheme.of(context);
 
-    return IgnorePointer(
-      ignoring: !widget.enabled,
-      child: Column(
-        children: [
-          buildTitle(
-            context: context,
-            theme: theme,
-            additionalInfo: additionalInfo,
-          ),
-          if (widget.description != null)
-            buildDescription(
+    return Semantics(
+      enabled: widget.enabled,
+      toggled:
+          widget.tileType == SettingsTileType.switchTile
+              ? widget.initialValue
+              : null,
+      button: widget.tileType != SettingsTileType.switchTile,
+      hint: widget.onPressed != null ? 'Double-tap to activate' : null,
+      child: Opacity(
+        opacity: widget.enabled ? 1.0 : 0.5,
+        child: IgnorePointer(
+          ignoring: !widget.enabled,
+          child: Column(
+          children: [
+            buildTitle(
               context: context,
               theme: theme,
               additionalInfo: additionalInfo,
             ),
-        ],
+            if (widget.description != null)
+              buildDescription(
+                context: context,
+                theme: theme,
+                additionalInfo: additionalInfo,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -96,10 +124,10 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
 
     return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(
-        left: 18,
-        right: 18,
+      width: MediaQuery.sizeOf(context).width,
+      padding: EdgeInsetsDirectional.only(
+        start: 18,
+        end: 18,
         top: 8 * scaleFactor,
         bottom: additionalInfo.needToShowDivider ? 24 : 8 * scaleFactor,
       ),
@@ -107,10 +135,15 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
         color: theme.themeData.settingsListBackground,
       ),
       child: DefaultTextStyle(
-        style: TextStyle(
-          color: theme.themeData.titleTextColor,
-          fontSize: 13,
-        ),
+        style: theme.themeData.descriptionTextStyle?.copyWith(
+              color: theme.themeData.titleTextColor,
+            ) ??
+            TextStyle(
+              color: theme.themeData.titleTextColor,
+              fontSize: 13,
+            ),
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
         child: widget.description!,
       ),
     );
@@ -127,11 +160,11 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
         if (widget.trailing != null) widget.trailing!,
         if (widget.tileType == SettingsTileType.switchTile)
           CupertinoSwitch(
-            value: widget.initialValue ?? true,
-            onChanged: widget.onToggle,
+            value: widget.initialValue ?? false,
+            onChanged: widget.enabled ? widget.onToggle : null,
             activeTrackColor: widget.enabled
                 ? widget.activeSwitchColor
-                : theme.themeData.inactiveTitleColor,
+                : null,
           ),
         if (widget.tileType == SettingsTileType.navigationTile &&
             widget.value != null)
@@ -152,9 +185,15 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                   .copyWith(color: theme.themeData.leadingIconsColor),
               child: Icon(
                 CupertinoIcons.chevron_forward,
-                size: 18 * scaleFactor,
+                size: 14 * scaleFactor,
               ),
             ),
+          ),
+        if (widget.selected && widget.trailing == null)
+          Icon(
+            CupertinoIcons.checkmark_alt,
+            color: CupertinoColors.systemBlue,
+            size: 20 * scaleFactor,
           ),
       ],
     );
@@ -180,14 +219,14 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
       onTap: widget.onPressed == null
           ? null
           : () {
-              changePressState(isPressed: true);
-
+              changePressState(isPressed: false);
               widget.onPressed!.call(context);
-
-              Future.delayed(
-                const Duration(milliseconds: 100),
-                () => changePressState(isPressed: false),
-              );
+            },
+      onLongPress: widget.onLongPress == null
+          ? null
+          : () {
+              changePressState(isPressed: false);
+              widget.onLongPress!.call(context);
             },
       onTapDown: (_) =>
           widget.onPressed == null ? null : changePressState(isPressed: true),
@@ -195,10 +234,11 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
           widget.onPressed == null ? null : changePressState(isPressed: false),
       onTapCancel: () =>
           widget.onPressed == null ? null : changePressState(isPressed: false),
-      child: Container(
-        color: isPressed
-            ? theme.themeData.tileHighlightColor
-            : theme.themeData.settingsSectionBackground,
+      child: Opacity(
+        opacity: isPressed ? 0.7 : 1.0,
+        child: Container(
+        constraints: const BoxConstraints(minHeight: 44),
+        color: theme.themeData.settingsSectionBackground,
         padding: const EdgeInsetsDirectional.only(start: 18),
         child: Row(
           children: [
@@ -226,16 +266,23 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                         Expanded(
                           child: Padding(
                             padding: EdgeInsetsDirectional.only(
-                              top: 12.5 * scaleFactor,
-                              bottom: 12.5 * scaleFactor,
+                              top: 12 * scaleFactor,
+                              bottom: 12 * scaleFactor,
                             ),
                             child: DefaultTextStyle(
-                              style: TextStyle(
-                                color: widget.enabled
-                                    ? theme.themeData.settingsTileTextColor
-                                    : theme.themeData.inactiveTitleColor,
-                                fontSize: 16,
-                              ),
+                              style: theme.themeData.titleTextStyle?.copyWith(
+                                    color: widget.enabled
+                                        ? theme.themeData.settingsTileTextColor
+                                        : theme.themeData.inactiveTitleColor,
+                                  ) ??
+                                  TextStyle(
+                                    color: widget.enabled
+                                        ? theme.themeData.settingsTileTextColor
+                                        : theme.themeData.inactiveTitleColor,
+                                    fontSize: 17,
+                                  ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               child: widget.title!,
                             ),
                           ),
@@ -244,11 +291,24 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                       ],
                     ),
                   ),
+                  if (widget.tileType == SettingsTileType.sliderTile)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 16),
+                      child: CupertinoSlider(
+                        value: widget.sliderValue ?? widget.sliderMin,
+                        min: widget.sliderMin,
+                        max: widget.sliderMax,
+                        divisions: widget.sliderDivisions,
+                        onChanged:
+                            widget.enabled ? widget.onSliderChanged : null,
+                        activeColor: widget.sliderActiveColor,
+                      ),
+                    ),
                   if (widget.description == null &&
                       additionalInfo.needToShowDivider)
                     Divider(
                       height: 0,
-                      thickness: 0.7,
+                      thickness: 1.0,
                       color: theme.themeData.dividerColor,
                     ),
                 ],
@@ -256,6 +316,7 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -283,12 +344,8 @@ class IOSSettingsTileAdditionalInfo extends InheritedWidget {
   static IOSSettingsTileAdditionalInfo of(BuildContext context) {
     final IOSSettingsTileAdditionalInfo? result = context
         .dependOnInheritedWidgetOfExactType<IOSSettingsTileAdditionalInfo>();
-    return result ??
-        const IOSSettingsTileAdditionalInfo(
-          needToShowDivider: true,
-          enableBottomBorderRadius: true,
-          enableTopBorderRadius: true,
-          child: SizedBox(),
-        );
+    assert(result != null,
+        'IOSSettingsTileAdditionalInfo not found. Ensure the tile is placed within an IOSSettingsSection.');
+    return result!;
   }
 }
