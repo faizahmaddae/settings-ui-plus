@@ -132,7 +132,12 @@ class SettingsList extends StatelessWidget {
 
   /// Resolves the current brightness based on [applicationType] and the
   /// ambient [MaterialApp] or [CupertinoApp] theme.
+  ///
+  /// When [brightness] is explicitly set, it takes precedence over the
+  /// ambient theme value.
   Brightness calculateBrightness(BuildContext context) {
+    if (brightness != null) return brightness!;
+
     final materialBrightness = Theme.of(context).brightness;
     final cupertinoBrightness =
         CupertinoTheme.of(context).brightness ??

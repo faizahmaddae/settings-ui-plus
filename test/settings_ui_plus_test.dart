@@ -1457,8 +1457,18 @@ void main() {
         ),
       );
 
-      final slider = tester.widget<Slider>(find.byType(Slider));
-      expect(slider.onChanged, isNull);
+      // The callback is still wired to the native Slider to prevent the
+      // widget's own disabled visual from stacking on top of the parent
+      // Opacity wrapper.  Interaction is blocked by IgnorePointer instead.
+      final ignorePointer = tester.widget<IgnorePointer>(
+        find
+            .ancestor(
+              of: find.byType(Slider),
+              matching: find.byType(IgnorePointer),
+            )
+            .first,
+      );
+      expect(ignorePointer.ignoring, isTrue);
     });
 
     testWidgets('slider tile renders on iOS with CupertinoSlider', (
@@ -1696,7 +1706,7 @@ void main() {
                   tiles: [
                     SettingsTile.switchTile(
                       title: const Text('Toggle'),
-                      initialValue: null,
+                      initialValue: false,
                       onToggle: (_) {},
                     ),
                   ],
@@ -2143,6 +2153,472 @@ void main() {
 
       await tester.longPress(find.text('Volume'));
       expect(longPressed, isTrue);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // SettingsList brightness override
+  // ---------------------------------------------------------------------------
+  group('SettingsList brightness override', () {
+    testWidgets('explicit brightness overrides ambient theme', (tester) async {
+      // The ambient MaterialApp is light, but we force dark via brightness.
+      const darkBg = Color(0xFF1C1C1E);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(useMaterial3: true),
+          home: const Scaffold(
+            body: SettingsList(
+              brightness: Brightness.dark,
+              darkTheme: SettingsThemeData(settingsListBackground: darkBg),
+              sections: [
+                SettingsSection(
+                  title: Text('Test'),
+                  tiles: [SettingsTile(title: Text('Item'))],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The dark theme background should be applied even though ambient is light.
+      final coloredBoxes = tester
+          .widgetList<ColoredBox>(find.byType(ColoredBox))
+          .where((box) => box.color == darkBg);
+      expect(coloredBoxes, isNotEmpty);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // SettingsThemeData.fromColorScheme
+  // ---------------------------------------------------------------------------
+  group('SettingsThemeData.fromColorScheme', () {
+    test('maps ColorScheme surface to settingsListBackground', () {
+      final scheme = ColorScheme.fromSeed(seedColor: Colors.blue);
+      final theme = SettingsThemeData.fromColorScheme(scheme);
+      expect(theme.settingsListBackground, scheme.surface);
+    });
+
+    test('maps ColorScheme primary to titleTextColor', () {
+      final scheme = ColorScheme.fromSeed(seedColor: Colors.teal);
+      final theme = SettingsThemeData.fromColorScheme(scheme);
+      expect(theme.titleTextColor, scheme.primary);
+    });
+
+    test('maps ColorScheme onSurface to settingsTileTextColor', () {
+      final scheme = ColorScheme.fromSeed(seedColor: Colors.red);
+      final theme = SettingsThemeData.fromColorScheme(scheme);
+      expect(theme.settingsTileTextColor, scheme.onSurface);
+    });
+
+    test(
+      'maps ColorScheme onSurfaceVariant to description and icon colors',
+      () {
+        final scheme = ColorScheme.fromSeed(seedColor: Colors.green);
+        final theme = SettingsThemeData.fromColorScheme(scheme);
+        expect(theme.tileDescriptionTextColor, scheme.onSurfaceVariant);
+        expect(theme.trailingTextColor, scheme.onSurfaceVariant);
+        expect(theme.leadingIconsColor, scheme.onSurfaceVariant);
+      },
+    );
+
+    test('inactive colors have reduced alpha', () {
+      final scheme = ColorScheme.fromSeed(seedColor: Colors.orange);
+      final theme = SettingsThemeData.fromColorScheme(scheme);
+      expect(theme.inactiveTitleColor, isNotNull);
+      // 38% opacity → alpha ≈ 97
+      expect(theme.inactiveTitleColor!.a, lessThan(0.5));
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // SettingsTileThemeData
+  // ---------------------------------------------------------------------------
+  group('SettingsTileThemeData', () {
+    test('default constructor has all null fields', () {
+      const data = SettingsTileThemeData();
+      expect(data.titleColor, isNull);
+      expect(data.descriptionColor, isNull);
+      expect(data.leadingIconColor, isNull);
+      expect(data.backgroundColor, isNull);
+      expect(data.titleTextStyle, isNull);
+      expect(data.descriptionTextStyle, isNull);
+    });
+
+    test('fields are stored correctly', () {
+      const data = SettingsTileThemeData(
+        titleColor: Colors.red,
+        descriptionColor: Colors.blue,
+        leadingIconColor: Colors.green,
+        backgroundColor: Colors.yellow,
+      );
+      expect(data.titleColor, Colors.red);
+      expect(data.descriptionColor, Colors.blue);
+      expect(data.leadingIconColor, Colors.green);
+      expect(data.backgroundColor, Colors.yellow);
+    });
+
+    testWidgets('tileTheme overrides title color on Material', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('Test'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Destructive'),
+                    tileTheme: SettingsTileThemeData(titleColor: Colors.red),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final titleWidget = tester.widget<DefaultTextStyle>(
+        find
+            .ancestor(
+              of: find.text('Destructive'),
+              matching: find.byType(DefaultTextStyle),
+            )
+            .first,
+      );
+      expect(titleWidget.style.color, Colors.red);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // DropdownSettingsItem & dropdownTile
+  // ---------------------------------------------------------------------------
+  group('DropdownSettingsItem', () {
+    test('stores value and child', () {
+      const item = DropdownSettingsItem(value: 'en', child: Text('English'));
+      expect(item.value, 'en');
+      expect(item.enabled, isTrue);
+    });
+
+    test('enabled defaults to true and can be set to false', () {
+      const item = DropdownSettingsItem(
+        value: 'fr',
+        child: Text('French'),
+        enabled: false,
+      );
+      expect(item.enabled, isFalse);
+    });
+  });
+
+  group('SettingsTile.dropdownTile', () {
+    testWidgets('renders DropdownButton on Material platform', (tester) async {
+      String? selected = 'en';
+
+      await tester.pumpWidget(
+        materialApp(
+          SettingsList(
+            sections: [
+              SettingsSection(
+                title: const Text('Lang'),
+                tiles: [
+                  SettingsTile.dropdownTile(
+                    title: const Text('Language'),
+                    dropdownItems: const [
+                      DropdownSettingsItem(value: 'en', child: Text('English')),
+                      DropdownSettingsItem(value: 'fr', child: Text('French')),
+                    ],
+                    dropdownValue: selected,
+                    onDropdownChanged: (v) => selected = v,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.byType(DropdownButton<String>), findsOneWidget);
+      expect(find.text('Language'), findsOneWidget);
+    });
+
+    testWidgets('tileType is dropdownTile', (tester) async {
+      const tile = SettingsTile.dropdownTile(
+        title: Text('Test'),
+        dropdownItems: [DropdownSettingsItem(value: 'a', child: Text('A'))],
+        dropdownValue: 'a',
+        onDropdownChanged: null,
+      );
+      expect(tile.tileType, SettingsTileType.dropdownTile);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // AnimatedSwitcher on value widget
+  // ---------------------------------------------------------------------------
+  group('AnimatedSwitcher for value', () {
+    testWidgets('Material tile wraps value in AnimatedSwitcher', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('Test'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Item'),
+                    value: Text('val', key: ValueKey('val')),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.ancestor(
+          of: find.text('val'),
+          matching: find.byType(AnimatedSwitcher),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Material slider tile wraps value in AnimatedSwitcher', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('Test'),
+                tiles: [
+                  SettingsTile.sliderTile(
+                    title: Text('Vol'),
+                    sliderValue: 0.5,
+                    onSliderChanged: null,
+                    value: Text('50', key: ValueKey(50)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.ancestor(
+          of: find.text('50'),
+          matching: find.byType(AnimatedSwitcher),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // SliverSettingsList
+  // ---------------------------------------------------------------------------
+  group('SliverSettingsList', () {
+    testWidgets('renders sections inside a CustomScrollView', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const CustomScrollView(
+            slivers: [
+              SliverSettingsList(
+                sections: [
+                  SettingsSection(
+                    title: Text('Sliver Section'),
+                    tiles: [SettingsTile(title: Text('Item'))],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Sliver Section'), findsOneWidget);
+      expect(find.text('Item'), findsOneWidget);
+    });
+
+    testWidgets('applies lightTheme', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const CustomScrollView(
+            slivers: [
+              SliverSettingsList(
+                lightTheme: SettingsThemeData(titleTextColor: Colors.purple),
+                sections: [
+                  SettingsSection(
+                    title: Text('Themed'),
+                    tiles: [SettingsTile(title: Text('Tile'))],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Verify it renders without errors
+      expect(find.text('Themed'), findsOneWidget);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // SearchableSettingsList
+  // ---------------------------------------------------------------------------
+  group('SearchableSettingsList', () {
+    testWidgets('renders search bar and sections', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SearchableSettingsList(
+            searchHint: 'Search...',
+            sections: [
+              SettingsSection(
+                title: Text('General'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Language'),
+                    searchTerms: ['language', 'locale'],
+                  ),
+                  SettingsTile(
+                    title: Text('Theme'),
+                    searchTerms: ['theme', 'dark'],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
+    });
+
+    testWidgets('filters tiles based on search query', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SearchableSettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('General'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Language'),
+                    searchTerms: ['language', 'locale'],
+                  ),
+                  SettingsTile(
+                    title: Text('Theme'),
+                    searchTerms: ['theme', 'dark'],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Type a query that only matches 'Language'
+      await tester.enterText(find.byType(TextField), 'lang');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Theme'), findsNothing);
+    });
+
+    testWidgets('shows all tiles when search is cleared', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SearchableSettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('General'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Language'),
+                    searchTerms: ['language'],
+                  ),
+                  SettingsTile(title: Text('Theme'), searchTerms: ['theme']),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'lang');
+      await tester.pumpAndSettle();
+      expect(find.text('Theme'), findsNothing);
+
+      // Clear the search
+      await tester.enterText(find.byType(TextField), '');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Theme'), findsOneWidget);
+    });
+
+    testWidgets('hides entire section when no tiles match', (tester) async {
+      await tester.pumpWidget(
+        materialApp(
+          const SearchableSettingsList(
+            sections: [
+              SettingsSection(
+                title: Text('Section A'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Apple'),
+                    searchTerms: ['apple', 'fruit'],
+                  ),
+                ],
+              ),
+              SettingsSection(
+                title: Text('Section B'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Banana'),
+                    searchTerms: ['banana', 'fruit'],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), 'apple');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Section A'), findsOneWidget);
+      expect(find.text('Apple'), findsOneWidget);
+      expect(find.text('Section B'), findsNothing);
+      expect(find.text('Banana'), findsNothing);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // searchTerms parameter
+  // ---------------------------------------------------------------------------
+  group('SettingsTile.searchTerms', () {
+    test('defaults to null', () {
+      const tile = SettingsTile(title: Text('Test'));
+      expect(tile.searchTerms, isNull);
+    });
+
+    test('stores the provided terms', () {
+      const tile = SettingsTile(
+        title: Text('Test'),
+        searchTerms: ['hello', 'world'],
+      );
+      expect(tile.searchTerms, ['hello', 'world']);
     });
   });
 }

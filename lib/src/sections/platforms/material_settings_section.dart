@@ -220,33 +220,20 @@ class _MaterialSettingsSectionState extends State<MaterialSettingsSection>
   }
 
   Widget _buildTileList({required bool showSeparators}) {
-    if (showSeparators) {
-      return ListView.separated(
-        shrinkWrap: true,
-        itemCount: widget.tiles.length,
-        padding: EdgeInsets.zero,
-        physics: const NeverScrollableScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          return widget.tiles[index];
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          final theme = SettingsTheme.of(context);
-          return Divider(
+    final theme = SettingsTheme.of(context);
+    final children = <Widget>[];
+    for (var i = 0; i < widget.tiles.length; i++) {
+      children.add(widget.tiles[i]);
+      if (showSeparators && i < widget.tiles.length - 1) {
+        children.add(
+          Divider(
             height: 1.0,
             thickness: 1.0,
             color: theme.themeData.dividerColor,
-          );
-        },
-      );
+          ),
+        );
+      }
     }
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: widget.tiles.length,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return widget.tiles[index];
-      },
-    );
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 }

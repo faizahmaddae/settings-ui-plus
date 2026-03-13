@@ -70,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _darkMode = false;
   bool _notifications = true;
   String _language = 'English';
+  String _timezone = 'UTC';
 
   // Appearance
   double _fontSize = 16;
@@ -99,9 +100,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: SettingsList(
-        // Demonstrates lightTheme / darkTheme overrides
-        lightTheme: const SettingsThemeData(
-          settingsListBackground: Color(0xFFF2F2F7),
+        // Demonstrates fromColorScheme factory — one line to match your theme
+        lightTheme: SettingsThemeData.fromColorScheme(
+          Theme.of(context).colorScheme,
         ),
         darkTheme: const SettingsThemeData(
           settingsListBackground: Color(0xFF1C1C1E),
@@ -159,6 +160,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Icon(
                   Icons.logout,
                   color: Theme.of(context).colorScheme.error,
+                ),
+                // Demonstrates per-tile theming via tileTheme
+                tileTheme: SettingsTileThemeData(
+                  titleColor: Theme.of(context).colorScheme.error,
                 ),
                 onPressed: (context) {
                   showDialog<void>(
@@ -220,6 +225,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: const Text('Language'),
                 leading: const Icon(Icons.language),
                 value: Text(_language),
+                searchTerms: const ['language', 'locale', 'translation'],
                 onPressed: (context) {
                   Navigator.of(context).push(
                     MaterialPageRoute<void>(
@@ -234,6 +240,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 },
               ),
+              // Demonstrates dropdownTile
+              SettingsTile.dropdownTile(
+                title: const Text('Timezone'),
+                leading: const Icon(Icons.schedule),
+                searchTerms: const ['timezone', 'time zone', 'clock'],
+                dropdownValue: _timezone,
+                dropdownItems: const [
+                  DropdownSettingsItem(value: 'UTC', child: Text('UTC')),
+                  DropdownSettingsItem(
+                    value: 'EST',
+                    child: Text('Eastern (EST)'),
+                  ),
+                  DropdownSettingsItem(
+                    value: 'PST',
+                    child: Text('Pacific (PST)'),
+                  ),
+                  DropdownSettingsItem(
+                    value: 'CET',
+                    child: Text('Central European (CET)'),
+                  ),
+                  DropdownSettingsItem(
+                    value: 'JST',
+                    child: Text('Japan (JST)'),
+                  ),
+                ],
+                onDropdownChanged: (value) {
+                  if (value != null) setState(() => _timezone = value);
+                },
+              ),
             ],
           ),
 
@@ -242,6 +277,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Appearance'),
             tiles: [
               // Slider with icon, description, and divisions
+              // Demonstrates AnimatedSwitcher – provide a ValueKey on value
+              // widget so the crossfade animates when the value changes.
               SettingsTile.sliderTile(
                 title: const Text('Font Size'),
                 leading: const Icon(Icons.text_fields),
@@ -249,8 +286,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 sliderMin: 10,
                 sliderMax: 30,
                 sliderDivisions: 20,
-                value: Text('${_fontSize.round()}'),
+                value: Text(
+                  '${_fontSize.round()}',
+                  key: ValueKey(_fontSize.round()),
+                ),
                 description: const Text('Adjust the base font size'),
+                searchTerms: const ['font', 'size', 'text'],
                 onSliderChanged: (value) => setState(() => _fontSize = value),
               ),
               // Slider without icon, continuous, with custom color
@@ -360,8 +401,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: (context) => showLicensePage(
                   context: context,
                   applicationName: 'Settings UI Plus Demo',
-                  applicationVersion: '0.2.1',
+                  applicationVersion: '0.2.3',
                 ),
+              ),
+            ],
+          ),
+
+          // ── New Features Demos ─────────────────────────────────
+          SettingsSection(
+            title: const Text('Feature Demos'),
+            tiles: [
+              SettingsTile.navigation(
+                title: const Text('Searchable Settings'),
+                leading: const Icon(Icons.search),
+                description: const Text('SearchableSettingsList widget'),
+                onPressed: (context) =>
+                    _push(context, const SearchableSettingsDemo()),
+              ),
+              SettingsTile.navigation(
+                title: const Text('Sliver Settings'),
+                leading: const Icon(Icons.view_list),
+                description: const Text(
+                  'SliverSettingsList in CustomScrollView',
+                ),
+                onPressed: (context) =>
+                    _push(context, const SliverSettingsDemo()),
               ),
             ],
           ),
@@ -372,7 +436,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Center(
                 child: Text(
-                  'settings_ui_plus v0.2.1',
+                  'settings_ui_plus v0.2.3',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.outline,
                     fontSize: 13,
@@ -583,6 +647,102 @@ class DetailScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(body, style: Theme.of(context).textTheme.bodyLarge),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SearchableSettingsList demo
+// ---------------------------------------------------------------------------
+
+class SearchableSettingsDemo extends StatelessWidget {
+  const SearchableSettingsDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Searchable Settings')),
+      body: SearchableSettingsList(
+        searchHint: 'Search settings\u2026',
+        sections: [
+          SettingsSection(
+            title: const Text('General'),
+            tiles: [
+              SettingsTile.navigation(
+                title: const Text('Language'),
+                leading: const Icon(Icons.language),
+                searchTerms: const ['language', 'locale'],
+              ),
+              SettingsTile.navigation(
+                title: const Text('Notifications'),
+                leading: const Icon(Icons.notifications_outlined),
+                searchTerms: const ['notifications', 'alerts', 'push'],
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: const Text('Display'),
+            tiles: [
+              SettingsTile.navigation(
+                title: const Text('Theme'),
+                leading: const Icon(Icons.palette_outlined),
+                searchTerms: const ['theme', 'dark mode', 'light mode'],
+              ),
+              SettingsTile.navigation(
+                title: const Text('Font Size'),
+                leading: const Icon(Icons.text_fields),
+                searchTerms: const ['font', 'size', 'text'],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SliverSettingsList demo
+// ---------------------------------------------------------------------------
+
+class SliverSettingsDemo extends StatelessWidget {
+  const SliverSettingsDemo({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar.large(title: const Text('Sliver Settings')),
+          SliverSettingsList(
+            sections: [
+              SettingsSection(
+                title: const Text('Section One'),
+                tiles: [
+                  SettingsTile.navigation(
+                    title: const Text('Item A'),
+                    leading: const Icon(Icons.star_outline),
+                  ),
+                  SettingsTile.navigation(
+                    title: const Text('Item B'),
+                    leading: const Icon(Icons.star_outline),
+                  ),
+                ],
+              ),
+              SettingsSection(
+                title: const Text('Section Two'),
+                tiles: [
+                  SettingsTile.switchTile(
+                    title: const Text('Toggle'),
+                    initialValue: true,
+                    onToggle: (_) {},
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

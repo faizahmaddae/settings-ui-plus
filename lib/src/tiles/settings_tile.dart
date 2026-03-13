@@ -6,7 +6,35 @@ import 'package:settings_ui_plus/src/utils/platform_utils.dart';
 import 'package:settings_ui_plus/src/utils/settings_theme.dart';
 
 /// The visual type of a [SettingsTile].
-enum SettingsTileType { simpleTile, switchTile, navigationTile, sliderTile }
+enum SettingsTileType {
+  simpleTile,
+  switchTile,
+  navigationTile,
+  radioTile,
+  sliderTile,
+  dropdownTile,
+}
+
+/// An item in a [SettingsTile.dropdownTile] selection list.
+///
+/// On Material, items render inside a [DropdownButton]. On iOS, they appear
+/// as actions in a [CupertinoActionSheet].
+class DropdownSettingsItem {
+  const DropdownSettingsItem({
+    required this.value,
+    required this.child,
+    this.enabled = true,
+  });
+
+  /// A unique identifier for this item, used as the selection key.
+  final String value;
+
+  /// The widget label displayed for this item.
+  final Widget child;
+
+  /// Whether this item is selectable. Defaults to `true`.
+  final bool enabled;
+}
 
 /// A single settings row that adapts to Material or Cupertino styling.
 ///
@@ -26,6 +54,8 @@ class SettingsTile extends AbstractSettingsTile {
     this.onPressed,
     this.onLongPress,
     this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
     super.key,
   }) : onToggle = null,
        initialValue = null,
@@ -37,6 +67,9 @@ class SettingsTile extends AbstractSettingsTile {
        sliderDivisions = null,
        onSliderChanged = null,
        sliderActiveColor = null,
+       dropdownItems = null,
+       dropdownValue = null,
+       onDropdownChanged = null,
        tileType = SettingsTileType.simpleTile;
 
   /// Creates a navigation tile that displays a trailing chevron indicator.
@@ -49,6 +82,8 @@ class SettingsTile extends AbstractSettingsTile {
     this.onPressed,
     this.onLongPress,
     this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
     super.key,
   }) : onToggle = null,
        initialValue = null,
@@ -60,6 +95,9 @@ class SettingsTile extends AbstractSettingsTile {
        sliderDivisions = null,
        onSliderChanged = null,
        sliderActiveColor = null,
+       dropdownItems = null,
+       dropdownValue = null,
+       onDropdownChanged = null,
        tileType = SettingsTileType.navigationTile;
 
   /// Creates a tile with an integrated platform-native toggle switch.
@@ -74,8 +112,11 @@ class SettingsTile extends AbstractSettingsTile {
     this.onPressed,
     this.onLongPress,
     this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
     super.key,
-  }) : value = null,
+  }) : assert(initialValue != null, 'initialValue is required for switchTile'),
+       value = null,
        selected = false,
        sliderValue = null,
        sliderMin = 0.0,
@@ -83,6 +124,9 @@ class SettingsTile extends AbstractSettingsTile {
        sliderDivisions = null,
        onSliderChanged = null,
        sliderActiveColor = null,
+       dropdownItems = null,
+       dropdownValue = null,
+       onDropdownChanged = null,
        tileType = SettingsTileType.switchTile;
 
   /// Creates a radio-style tile that shows a checkmark when [selected] is true.
@@ -95,6 +139,8 @@ class SettingsTile extends AbstractSettingsTile {
     this.onPressed,
     this.onLongPress,
     this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
     super.key,
   }) : onToggle = null,
        initialValue = null,
@@ -106,7 +152,10 @@ class SettingsTile extends AbstractSettingsTile {
        sliderDivisions = null,
        onSliderChanged = null,
        sliderActiveColor = null,
-       tileType = SettingsTileType.simpleTile;
+       dropdownItems = null,
+       dropdownValue = null,
+       onDropdownChanged = null,
+       tileType = SettingsTileType.radioTile;
 
   /// Creates a tile with an inline slider control.
   ///
@@ -128,12 +177,59 @@ class SettingsTile extends AbstractSettingsTile {
     this.onPressed,
     this.onLongPress,
     this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
     super.key,
-  }) : onToggle = null,
+  }) : assert(sliderMin < sliderMax, 'sliderMin must be less than sliderMax'),
+       assert(
+         sliderValue == null ||
+             (sliderValue >= sliderMin && sliderValue <= sliderMax),
+         'sliderValue must be between sliderMin and sliderMax',
+       ),
+       assert(
+         sliderDivisions == null || sliderDivisions > 0,
+         'sliderDivisions must be positive',
+       ),
+       onToggle = null,
        initialValue = null,
        activeSwitchColor = null,
        selected = false,
+       dropdownItems = null,
+       dropdownValue = null,
+       onDropdownChanged = null,
        tileType = SettingsTileType.sliderTile;
+
+  /// Creates a tile with an inline dropdown selector.
+  ///
+  /// On Material, renders a [DropdownButton] in the trailing area. On iOS,
+  /// tapping the tile opens a [CupertinoActionSheet] with the available items.
+  const SettingsTile.dropdownTile({
+    required this.dropdownItems,
+    required this.dropdownValue,
+    required this.onDropdownChanged,
+    this.leading,
+    this.trailing,
+    required this.title,
+    this.description,
+    this.onPressed,
+    this.onLongPress,
+    this.enabled = true,
+    this.tileTheme,
+    this.searchTerms,
+    super.key,
+  }) : assert(dropdownItems != null, 'dropdownItems is required'),
+       onToggle = null,
+       initialValue = null,
+       activeSwitchColor = null,
+       value = null,
+       selected = false,
+       sliderValue = null,
+       sliderMin = 0.0,
+       sliderMax = 1.0,
+       sliderDivisions = null,
+       onSliderChanged = null,
+       sliderActiveColor = null,
+       tileType = SettingsTileType.dropdownTile;
 
   /// The widget at the beginning of the tile
   final Widget? leading;
@@ -192,6 +288,23 @@ class SettingsTile extends AbstractSettingsTile {
   /// Active track / thumb color for the slider.
   final Color? sliderActiveColor;
 
+  /// The list of items for [SettingsTile.dropdownTile].
+  final List<DropdownSettingsItem>? dropdownItems;
+
+  /// The currently-selected value for [SettingsTile.dropdownTile].
+  final String? dropdownValue;
+
+  /// Called when the dropdown selection changes.
+  final ValueChanged<String?>? onDropdownChanged;
+
+  /// Per-tile theme overrides that take priority over the inherited
+  /// [SettingsThemeData].
+  final SettingsTileThemeData? tileTheme;
+
+  /// Keywords used by [SearchableSettingsList] to match this tile against
+  /// a search query.
+  final List<String>? searchTerms;
+
   @override
   Widget build(BuildContext context) {
     final theme = SettingsTheme.of(context);
@@ -222,6 +335,10 @@ class SettingsTile extends AbstractSettingsTile {
           sliderDivisions: sliderDivisions,
           onSliderChanged: onSliderChanged,
           sliderActiveColor: sliderActiveColor,
+          dropdownItems: dropdownItems,
+          dropdownValue: dropdownValue,
+          onDropdownChanged: onDropdownChanged,
+          tileTheme: tileTheme,
         );
       case DevicePlatform.iOS:
       case DevicePlatform.macOS:
@@ -245,6 +362,10 @@ class SettingsTile extends AbstractSettingsTile {
           sliderDivisions: sliderDivisions,
           onSliderChanged: onSliderChanged,
           sliderActiveColor: sliderActiveColor,
+          dropdownItems: dropdownItems,
+          dropdownValue: dropdownValue,
+          onDropdownChanged: onDropdownChanged,
+          tileTheme: tileTheme,
         );
     }
   }

@@ -1,6 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:settings_ui_plus/src/utils/platform_utils.dart';
 
+/// Per-tile theme overrides that take precedence over the inherited
+/// [SettingsThemeData].
+///
+/// Pass an instance to `SettingsTile(tileTheme: ...)` to style individual
+/// tiles differently — for example a destructive "Sign Out" row or a
+/// premium upgrade prompt.
+class SettingsTileThemeData {
+  const SettingsTileThemeData({
+    this.titleColor,
+    this.descriptionColor,
+    this.leadingIconColor,
+    this.backgroundColor,
+    this.titleTextStyle,
+    this.descriptionTextStyle,
+  });
+
+  /// Override the title text color for this tile.
+  final Color? titleColor;
+
+  /// Override the description text color for this tile.
+  final Color? descriptionColor;
+
+  /// Override the leading icon color for this tile.
+  final Color? leadingIconColor;
+
+  /// Override the tile background color for this tile.
+  final Color? backgroundColor;
+
+  /// Override the title text style for this tile.
+  final TextStyle? titleTextStyle;
+
+  /// Override the description text style for this tile.
+  final TextStyle? descriptionTextStyle;
+}
+
 /// An [InheritedWidget] that propagates [SettingsThemeData] and the active
 /// [DevicePlatform] down the widget tree.
 ///
@@ -57,6 +92,33 @@ class SettingsThemeData {
     this.descriptionTextStyle,
     this.sectionTitleTextStyle,
   });
+
+  /// Creates a [SettingsThemeData] derived from a Material 3 [ColorScheme].
+  ///
+  /// This gives you one-line integration with your app's theme:
+  /// ```dart
+  /// SettingsList(
+  ///   lightTheme: SettingsThemeData.fromColorScheme(
+  ///     Theme.of(context).colorScheme,
+  ///   ),
+  ///   ...
+  /// )
+  /// ```
+  factory SettingsThemeData.fromColorScheme(ColorScheme scheme) {
+    return SettingsThemeData(
+      settingsListBackground: scheme.surface,
+      settingsSectionBackground: scheme.surfaceContainerLow,
+      titleTextColor: scheme.primary,
+      settingsTileTextColor: scheme.onSurface,
+      tileDescriptionTextColor: scheme.onSurfaceVariant,
+      trailingTextColor: scheme.onSurfaceVariant,
+      leadingIconsColor: scheme.onSurfaceVariant,
+      dividerColor: scheme.outlineVariant,
+      tileHighlightColor: scheme.surfaceContainerHighest,
+      inactiveTitleColor: scheme.onSurface.withAlpha(97),
+      inactiveSubtitleColor: scheme.onSurface.withAlpha(97),
+    );
+  }
 
   /// Background color of the entire [SettingsList].
   final Color? settingsListBackground;

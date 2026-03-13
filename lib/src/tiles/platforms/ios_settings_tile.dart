@@ -23,6 +23,10 @@ class IOSSettingsTile extends StatefulWidget {
     this.sliderDivisions,
     this.onSliderChanged,
     this.sliderActiveColor,
+    this.dropdownItems,
+    this.dropdownValue,
+    this.onDropdownChanged,
+    this.tileTheme,
     super.key,
   });
 
@@ -45,13 +49,38 @@ class IOSSettingsTile extends StatefulWidget {
   final int? sliderDivisions;
   final ValueChanged<double>? onSliderChanged;
   final Color? sliderActiveColor;
+  final List<DropdownSettingsItem>? dropdownItems;
+  final String? dropdownValue;
+  final ValueChanged<String?>? onDropdownChanged;
+  final SettingsTileThemeData? tileTheme;
 
   @override
   State<IOSSettingsTile> createState() => _IOSSettingsTileState();
 }
 
-class _IOSSettingsTileState extends State<IOSSettingsTile> {
-  bool isPressed = false;
+class _IOSSettingsTileState extends State<IOSSettingsTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pressController;
+  late final Animation<double> _pressAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pressController = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: this,
+      value: 1.0,
+      lowerBound: 0.7,
+      upperBound: 1.0,
+    );
+    _pressAnimation = _pressController;
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,13 +92,23 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
       toggled: widget.tileType == SettingsTileType.switchTile
           ? widget.initialValue
           : null,
-      button: widget.tileType != SettingsTileType.switchTile,
+      selected: widget.tileType == SettingsTileType.radioTile
+          ? widget.selected
+          : null,
+      inMutuallyExclusiveGroup: widget.tileType == SettingsTileType.radioTile
+          ? true
+          : null,
+      button:
+          widget.tileType != SettingsTileType.switchTile &&
+          widget.tileType != SettingsTileType.radioTile,
       hint: widget.tileType == SettingsTileType.switchTile
           ? (widget.onToggle != null ? 'Double-tap to toggle' : null)
           : widget.tileType == SettingsTileType.sliderTile
           ? (widget.onSliderChanged != null || widget.onPressed != null
                 ? 'Adjust with slider'
                 : null)
+          : widget.tileType == SettingsTileType.dropdownTile
+          ? (widget.onDropdownChanged != null ? 'Double-tap to select' : null)
           : (widget.onPressed != null ? 'Double-tap to activate' : null),
       child: Opacity(
         opacity: widget.enabled ? 1.0 : 0.5,
@@ -136,15 +175,20 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
       decoration: BoxDecoration(color: theme.themeData.settingsListBackground),
       child: DefaultTextStyle(
         style:
+            widget.tileTheme?.descriptionTextStyle ??
             theme.themeData.descriptionTextStyle?.copyWith(
-              color: widget.enabled
-                  ? theme.themeData.tileDescriptionTextColor
-                  : theme.themeData.inactiveTitleColor,
+              color:
+                  widget.tileTheme?.descriptionColor ??
+                  (widget.enabled
+                      ? theme.themeData.tileDescriptionTextColor
+                      : theme.themeData.inactiveTitleColor),
             ) ??
             TextStyle(
-              color: widget.enabled
-                  ? theme.themeData.tileDescriptionTextColor
-                  : theme.themeData.inactiveTitleColor,
+              color:
+                  widget.tileTheme?.descriptionColor ??
+                  (widget.enabled
+                      ? theme.themeData.tileDescriptionTextColor
+                      : theme.themeData.inactiveTitleColor),
               fontSize: 13,
             ),
         maxLines: 3,
@@ -179,7 +223,39 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                   : theme.themeData.inactiveTitleColor,
               fontSize: 17,
             ),
-            child: widget.value!,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: widget.value!,
+            ),
+          ),
+        if (widget.tileType == SettingsTileType.dropdownTile &&
+            widget.dropdownItems != null)
+          GestureDetector(
+            onTap: widget.onDropdownChanged == null
+                ? null
+                : () => _showDropdownSheet(context, theme),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DefaultTextStyle(
+                  style: TextStyle(
+                    color: widget.enabled
+                        ? theme.themeData.trailingTextColor
+                        : theme.themeData.inactiveTitleColor,
+                    fontSize: 17,
+                  ),
+                  child: _selectedDropdownLabel ?? const SizedBox.shrink(),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 6, end: 2),
+                  child: Icon(
+                    CupertinoIcons.chevron_up_chevron_down,
+                    size: 14 * scaleFactor,
+                    color: theme.themeData.leadingIconsColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         if (widget.tileType == SettingsTileType.navigationTile)
           Padding(
@@ -204,11 +280,51 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     );
   }
 
+  Widget? get _selectedDropdownLabel {
+    if (widget.dropdownValue == null || widget.dropdownItems == null) {
+      return null;
+    }
+    for (final item in widget.dropdownItems!) {
+      if (item.value == widget.dropdownValue) {
+        return item.child;
+      }
+    }
+    return null;
+  }
+
+  void _showDropdownSheet(BuildContext context, SettingsTheme theme) {
+    showCupertinoModalPopup<String>(
+      context: context,
+      builder: (sheetContext) => CupertinoActionSheet(
+        actions: widget.dropdownItems!.map((item) {
+          return CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.of(sheetContext).pop(item.value);
+            },
+            isDefaultAction: item.value == widget.dropdownValue,
+            child: item.child,
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.of(sheetContext).pop(),
+          child: const Text('Cancel'),
+        ),
+      ),
+    ).then((selectedValue) {
+      if (selectedValue != null) {
+        widget.onDropdownChanged?.call(selectedValue);
+      }
+    });
+  }
+
   void changePressState({bool isPressed = false}) {
     if (mounted) {
-      setState(() {
-        this.isPressed = isPressed;
-      });
+      if (isPressed) {
+        _pressController.reverse();
+      } else {
+        _pressController.forward();
+      }
     }
   }
 
@@ -229,166 +345,179 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     IOSSettingsTileAdditionalInfo additionalInfo,
   ) {
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
+    final effectiveTitleColor =
+        widget.tileTheme?.titleColor ??
+        (widget.enabled
+            ? theme.themeData.settingsTileTextColor
+            : theme.themeData.inactiveTitleColor);
+    final effectiveDescriptionColor =
+        widget.tileTheme?.descriptionColor ??
+        (widget.enabled
+            ? theme.themeData.tileDescriptionTextColor
+            : theme.themeData.inactiveTitleColor);
+    final effectiveTitleStyle =
+        widget.tileTheme?.titleTextStyle ??
+        theme.themeData.titleTextStyle?.copyWith(color: effectiveTitleColor) ??
+        TextStyle(color: effectiveTitleColor, fontSize: 17);
+    final effectiveDescriptionStyle =
+        widget.tileTheme?.descriptionTextStyle ??
+        theme.themeData.descriptionTextStyle?.copyWith(
+          color: effectiveDescriptionColor,
+        ) ??
+        TextStyle(color: effectiveDescriptionColor, fontSize: 13);
+    final effectiveBg =
+        widget.tileTheme?.backgroundColor ??
+        theme.themeData.settingsSectionBackground;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: widget.onPressed == null
-          ? null
-          : () {
-              changePressState(isPressed: false);
-              widget.onPressed!.call(context);
-            },
-      onLongPress: widget.onLongPress == null
-          ? null
-          : () {
-              changePressState(isPressed: false);
-              widget.onLongPress!.call(context);
-            },
-      onTapDown: (_) =>
-          widget.onPressed == null ? null : changePressState(isPressed: true),
-      onTapUp: (_) =>
-          widget.onPressed == null ? null : changePressState(isPressed: false),
-      onTapCancel: () =>
-          widget.onPressed == null ? null : changePressState(isPressed: false),
-      child: Opacity(
-        opacity: isPressed ? 0.7 : 1.0,
-        child: Container(
-          color: theme.themeData.settingsSectionBackground,
-          padding: EdgeInsetsDirectional.only(
-            start: 16,
-            top: 10 * scaleFactor,
-            bottom: 4 * scaleFactor,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Leading icon, vertically centered
-              if (widget.leading != null)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 14.0),
-                  child: IconTheme.merge(
-                    data: IconThemeData(
-                      color: widget.enabled
-                          ? theme.themeData.leadingIconsColor
-                          : theme.themeData.inactiveTitleColor,
-                    ),
-                    child: widget.leading!,
-                  ),
-                ),
-              // Content column: title row + description + slider
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Title row: title ... value
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Title area with gesture handling (same structure as standard tile)
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: widget.onPressed == null
+              ? null
+              : () {
+                  changePressState(isPressed: false);
+                  widget.onPressed!.call(context);
+                },
+          onLongPress: widget.onLongPress == null
+              ? null
+              : () {
+                  changePressState(isPressed: false);
+                  widget.onLongPress!.call(context);
+                },
+          onTapDown: (_) => widget.onPressed == null
+              ? null
+              : changePressState(isPressed: true),
+          onTapUp: (_) => widget.onPressed == null
+              ? null
+              : changePressState(isPressed: false),
+          onTapCancel: () => widget.onPressed == null
+              ? null
+              : changePressState(isPressed: false),
+          child: FadeTransition(
+            opacity: _pressAnimation,
+            child: Container(
+              color: effectiveBg,
+              padding: const EdgeInsetsDirectional.only(start: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (widget.leading != null)
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 16),
-                      child: Row(
+                      padding: const EdgeInsetsDirectional.only(end: 14.0),
+                      child: IconTheme.merge(
+                        data: IconThemeData(
+                          color:
+                              widget.tileTheme?.leadingIconColor ??
+                              (widget.enabled
+                                  ? theme.themeData.leadingIconsColor
+                                  : theme.themeData.inactiveTitleColor),
+                        ),
+                        child: widget.leading!,
+                      ),
+                    ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        end: 16,
+                        top: 12 * scaleFactor,
+                        bottom: 4 * scaleFactor,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: DefaultTextStyle(
-                              style:
-                                  theme.themeData.titleTextStyle?.copyWith(
-                                    color: widget.enabled
-                                        ? theme.themeData.settingsTileTextColor
-                                        : theme.themeData.inactiveTitleColor,
-                                  ) ??
-                                  TextStyle(
-                                    color: widget.enabled
-                                        ? theme.themeData.settingsTileTextColor
-                                        : theme.themeData.inactiveTitleColor,
-                                    fontSize: 17,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: DefaultTextStyle(
+                                  style: effectiveTitleStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  child:
+                                      widget.title ?? const SizedBox.shrink(),
+                                ),
+                              ),
+                              if (widget.value != null)
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: 8,
                                   ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              child: widget.title ?? const SizedBox.shrink(),
-                            ),
+                                  child: DefaultTextStyle(
+                                    style: effectiveDescriptionStyle.copyWith(
+                                      fontSize: 15,
+                                    ),
+                                    child: AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 200,
+                                      ),
+                                      child: widget.value!,
+                                    ),
+                                  ),
+                                ),
+                              if (widget.trailing != null)
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                    start: 8,
+                                  ),
+                                  child: widget.trailing!,
+                                ),
+                            ],
                           ),
-                          if (widget.value != null)
+                          if (widget.description != null)
                             Padding(
-                              padding: const EdgeInsetsDirectional.only(
-                                start: 8,
+                              padding: EdgeInsetsDirectional.only(
+                                top: 2 * scaleFactor,
                               ),
                               child: DefaultTextStyle(
-                                style: TextStyle(
-                                  color: widget.enabled
-                                      ? theme.themeData.trailingTextColor
-                                      : theme.themeData.inactiveTitleColor,
-                                  fontSize: 17,
-                                ),
-                                child: widget.value!,
+                                style: effectiveDescriptionStyle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                child: widget.description!,
                               ),
-                            ),
-                          if (widget.trailing != null)
-                            Padding(
-                              padding: const EdgeInsetsDirectional.only(
-                                start: 8,
-                              ),
-                              child: widget.trailing!,
                             ),
                         ],
                       ),
                     ),
-                    // Description below title if present
-                    if (widget.description != null)
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(
-                          end: 16,
-                          top: 2 * scaleFactor,
-                        ),
-                        child: DefaultTextStyle(
-                          style:
-                              theme.themeData.descriptionTextStyle?.copyWith(
-                                color: widget.enabled
-                                    ? theme.themeData.tileDescriptionTextColor
-                                    : theme.themeData.inactiveTitleColor,
-                              ) ??
-                              TextStyle(
-                                color: widget.enabled
-                                    ? theme.themeData.tileDescriptionTextColor
-                                    : theme.themeData.inactiveTitleColor,
-                                fontSize: 13,
-                              ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          child: widget.description!,
-                        ),
-                      ),
-                    // Slider filling the full content width
-                    Padding(
-                      padding: EdgeInsetsDirectional.only(
-                        end: 16,
-                        top: 2 * scaleFactor,
-                      ),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: CupertinoSlider(
-                          value: widget.sliderValue ?? widget.sliderMin,
-                          min: widget.sliderMin,
-                          max: widget.sliderMax,
-                          divisions: widget.sliderDivisions,
-                          onChanged: widget.enabled
-                              ? widget.onSliderChanged
-                              : null,
-                          activeColor: widget.sliderActiveColor,
-                        ),
-                      ),
-                    ),
-                    if (widget.description == null &&
-                        additionalInfo.needToShowDivider)
-                      Divider(
-                        height: 0,
-                        thickness: 0.5,
-                        color: theme.themeData.dividerColor,
-                      ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        // Slider placed outside gesture detector so drag works independently
+        Container(
+          color: effectiveBg,
+          padding: EdgeInsetsDirectional.only(
+            start: widget.leading != null ? 46 : 16,
+            end: 16,
+            bottom: 4 * scaleFactor,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: CupertinoSlider(
+              value: widget.sliderValue ?? widget.sliderMin,
+              min: widget.sliderMin,
+              max: widget.sliderMax,
+              divisions: widget.sliderDivisions,
+              onChanged: widget.onSliderChanged,
+              activeColor: widget.sliderActiveColor,
+            ),
+          ),
+        ),
+        if (widget.description == null && additionalInfo.needToShowDivider)
+          Container(
+            color: effectiveBg,
+            padding: const EdgeInsetsDirectional.only(start: 16),
+            child: Divider(
+              height: 0,
+              thickness: 0.5,
+              color: theme.themeData.dividerColor,
+            ),
+          ),
+      ],
     );
   }
 
@@ -398,6 +527,18 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
     IOSSettingsTileAdditionalInfo additionalInfo,
   ) {
     final scaleFactor = MediaQuery.textScalerOf(context).scale(1);
+    final effectiveTitleColor =
+        widget.tileTheme?.titleColor ??
+        (widget.enabled
+            ? theme.themeData.settingsTileTextColor
+            : theme.themeData.inactiveTitleColor);
+    final effectiveTitleStyle =
+        widget.tileTheme?.titleTextStyle ??
+        theme.themeData.titleTextStyle?.copyWith(color: effectiveTitleColor) ??
+        TextStyle(color: effectiveTitleColor, fontSize: 17);
+    final effectiveBg =
+        widget.tileTheme?.backgroundColor ??
+        theme.themeData.settingsSectionBackground;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -419,11 +560,11 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
           widget.onPressed == null ? null : changePressState(isPressed: false),
       onTapCancel: () =>
           widget.onPressed == null ? null : changePressState(isPressed: false),
-      child: Opacity(
-        opacity: isPressed ? 0.7 : 1.0,
+      child: FadeTransition(
+        opacity: _pressAnimation,
         child: Container(
           constraints: const BoxConstraints(minHeight: 44),
-          color: theme.themeData.settingsSectionBackground,
+          color: effectiveBg,
           padding: const EdgeInsetsDirectional.only(start: 16),
           child: Row(
             children: [
@@ -432,9 +573,11 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                   padding: const EdgeInsetsDirectional.only(end: 14.0),
                   child: IconTheme.merge(
                     data: IconThemeData(
-                      color: widget.enabled
-                          ? theme.themeData.leadingIconsColor
-                          : theme.themeData.inactiveTitleColor,
+                      color:
+                          widget.tileTheme?.leadingIconColor ??
+                          (widget.enabled
+                              ? theme.themeData.leadingIconsColor
+                              : theme.themeData.inactiveTitleColor),
                     ),
                     child: widget.leading!,
                   ),
@@ -455,22 +598,7 @@ class _IOSSettingsTileState extends State<IOSSettingsTile> {
                                 bottom: 12 * scaleFactor,
                               ),
                               child: DefaultTextStyle(
-                                style:
-                                    theme.themeData.titleTextStyle?.copyWith(
-                                      color: widget.enabled
-                                          ? theme
-                                                .themeData
-                                                .settingsTileTextColor
-                                          : theme.themeData.inactiveTitleColor,
-                                    ) ??
-                                    TextStyle(
-                                      color: widget.enabled
-                                          ? theme
-                                                .themeData
-                                                .settingsTileTextColor
-                                          : theme.themeData.inactiveTitleColor,
-                                      fontSize: 17,
-                                    ),
+                                style: effectiveTitleStyle,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 child: widget.title ?? const SizedBox.shrink(),

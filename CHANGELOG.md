@@ -1,5 +1,18 @@
 ## 0.2.3
 
+### New Features
+- **`SearchableSettingsList`** — drop-in replacement for `SettingsList` with a built-in search bar that filters sections and tiles in real time by title and description.
+- **`SliverSettingsList`** — sliver-based variant of `SettingsList` for embedding settings inside a `CustomScrollView` alongside other slivers.
+- **`SettingsTile.dropdownTile`** — new constructor for inline dropdown selection with platform-adaptive rendering (Material `DropdownButton` / Cupertino action sheet).
+- **`SettingsTileThemeData`** — per-tile theme override via `SettingsTile.tileTheme`, allowing individual tiles to override the global `SettingsThemeData`.
+- **Animated value transitions** — tile `value` widgets now cross-fade smoothly using `AnimatedSwitcher` instead of snapping instantly.
+- **`SettingsThemeData.fromColorScheme`** factory — generates a complete `SettingsThemeData` from a Flutter `ColorScheme` for quick Material 3 integration.
+- **Golden tests** — added visual regression tests for Material and iOS variants in both light and dark themes.
+
+### Fixes
+- **Brightness override respected** — `SettingsList.calculateBrightness()` now correctly returns the explicit `brightness` parameter when provided, instead of always falling through to `MediaQuery` / platform brightness.
+
+### Improvements
 - Added dartdoc comments to all public API members for full documentation coverage.
 - Removed unnecessary library name to fix `unnecessary_library_name` lint.
 

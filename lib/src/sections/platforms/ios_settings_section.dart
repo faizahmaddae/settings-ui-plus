@@ -130,40 +130,37 @@ class _IOSSettingsSectionState extends State<IOSSettingsSection>
   }
 
   Widget buildTileList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: widget.tiles.length,
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        final tile = widget.tiles[index];
+    final children = <Widget>[];
+    for (var index = 0; index < widget.tiles.length; index++) {
+      final tile = widget.tiles[index];
 
-        var enableTop = false;
+      var enableTop = false;
 
-        if (index == 0 ||
-            (index > 0 &&
-                widget.tiles[index - 1] is SettingsTile &&
-                (widget.tiles[index - 1] as SettingsTile).description !=
-                    null)) {
-          enableTop = true;
-        }
+      if (index == 0 ||
+          (index > 0 &&
+              widget.tiles[index - 1] is SettingsTile &&
+              (widget.tiles[index - 1] as SettingsTile).description != null)) {
+        enableTop = true;
+      }
 
-        var enableBottom = false;
+      var enableBottom = false;
 
-        if (index == widget.tiles.length - 1 ||
-            (index < widget.tiles.length &&
-                tile is SettingsTile &&
-                (tile).description != null)) {
-          enableBottom = true;
-        }
+      if (index == widget.tiles.length - 1 ||
+          (index < widget.tiles.length &&
+              tile is SettingsTile &&
+              (tile).description != null)) {
+        enableBottom = true;
+      }
 
-        return IOSSettingsTileAdditionalInfo(
+      children.add(
+        IOSSettingsTileAdditionalInfo(
           enableTopBorderRadius: enableTop,
           enableBottomBorderRadius: enableBottom,
           needToShowDivider: index != widget.tiles.length - 1,
           child: tile,
-        );
-      },
-    );
+        ),
+      );
+    }
+    return Column(mainAxisSize: MainAxisSize.min, children: children);
   }
 }
