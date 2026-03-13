@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// The platform that controls which visual style settings widgets use.
 enum DevicePlatform {
   /// Android: <https://www.android.com/>
   android,
@@ -24,7 +25,9 @@ enum DevicePlatform {
   web,
 }
 
+/// Utility for detecting the current [DevicePlatform] from the widget tree.
 class PlatformUtils {
+  /// Returns the [DevicePlatform] matching the current runtime environment.
   static DevicePlatform detectPlatform(BuildContext context) {
     if (kIsWeb) return DevicePlatform.web;
 

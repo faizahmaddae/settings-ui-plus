@@ -8,6 +8,7 @@ import 'package:settings_ui_plus/src/sections/abstract_settings_section.dart';
 class CustomSettingsSection extends AbstractSettingsSection {
   const CustomSettingsSection({required this.child, super.key});
 
+  /// The custom widget to render as a section.
   final Widget child;
 
   @override

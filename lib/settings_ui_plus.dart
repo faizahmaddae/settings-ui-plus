@@ -1,3 +1,10 @@
+/// Build native-looking settings screens in minutes.
+///
+/// A single API that adapts to Material and Cupertino design guidelines
+/// automatically. Import this library and use [SettingsList], [SettingsSection],
+/// and [SettingsTile] to compose your settings UI.
+library;
+
 export 'package:settings_ui_plus/src/list/settings_list.dart'
     show ApplicationType, SettingsList;
 export 'package:settings_ui_plus/src/sections/abstract_settings_section.dart';

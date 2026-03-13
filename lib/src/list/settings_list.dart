@@ -5,15 +5,18 @@ import 'package:settings_ui_plus/src/utils/platform_utils.dart';
 import 'package:settings_ui_plus/src/utils/settings_theme.dart';
 import 'package:settings_ui_plus/src/utils/theme_provider.dart';
 
+/// Determines how [SettingsList] resolves brightness (light/dark mode).
+///
+/// This tells the list whether your app uses [MaterialApp], [CupertinoApp],
+/// or both, so it queries the correct theme for the current brightness.
 enum ApplicationType {
-  /// Use this parameter is you are using the MaterialApp
+  /// The app uses [MaterialApp]; brightness comes from [ThemeData.brightness].
   material,
 
-  /// Use this parameter is you are using the CupertinoApp
+  /// The app uses [CupertinoApp]; brightness comes from [CupertinoThemeData].
   cupertino,
 
-  /// Use this parameter is you are using the MaterialApp for Android
-  /// and the CupertinoApp for iOS.
+  /// The app uses [MaterialApp] on Android and [CupertinoApp] on iOS.
   both,
 }
 
@@ -37,14 +40,31 @@ class SettingsList extends StatelessWidget {
     super.key,
   });
 
+  /// Whether the list should shrink-wrap its content.
   final bool shrinkWrap;
+
+  /// Custom scroll physics for the underlying [ListView].
   final ScrollPhysics? physics;
+
+  /// Forces a specific platform appearance instead of auto-detecting.
   final DevicePlatform? platform;
+
+  /// Theme overrides applied when the resolved brightness is [Brightness.light].
   final SettingsThemeData? lightTheme;
+
+  /// Theme overrides applied when the resolved brightness is [Brightness.dark].
   final SettingsThemeData? darkTheme;
+
+  /// Forces a specific brightness instead of reading the app theme.
   final Brightness? brightness;
+
+  /// Custom padding around the list content.
   final EdgeInsetsGeometry? contentPadding;
+
+  /// The sections to display in this settings list.
   final List<AbstractSettingsSection> sections;
+
+  /// Controls how brightness is resolved. Defaults to [ApplicationType.material].
   final ApplicationType applicationType;
 
   @override
@@ -91,6 +111,7 @@ class SettingsList extends StatelessWidget {
     );
   }
 
+  /// Returns horizontal padding that centres content at a max width of 810.
   EdgeInsets calculateDefaultPadding(
     DevicePlatform platform,
     BuildContext context,
@@ -109,6 +130,8 @@ class SettingsList extends StatelessWidget {
     return EdgeInsets.symmetric(vertical: isWeb ? 20 : 0);
   }
 
+  /// Resolves the current brightness based on [applicationType] and the
+  /// ambient [MaterialApp] or [CupertinoApp] theme.
   Brightness calculateBrightness(BuildContext context) {
     final materialBrightness = Theme.of(context).brightness;
     final cupertinoBrightness =

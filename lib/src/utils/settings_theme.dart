@@ -24,6 +24,7 @@ class SettingsTheme extends InheritedWidget {
   bool updateShouldNotify(SettingsTheme old) =>
       themeData != old.themeData || platform != old.platform;
 
+  /// Returns the nearest [SettingsTheme] ancestor, or throws if none exists.
   static SettingsTheme of(BuildContext context) {
     final SettingsTheme? result = context
         .dependOnInheritedWidgetOfExactType<SettingsTheme>();
@@ -57,16 +58,37 @@ class SettingsThemeData {
     this.sectionTitleTextStyle,
   });
 
+  /// Background color of the entire [SettingsList].
   final Color? settingsListBackground;
+
+  /// Text color for trailing value labels.
   final Color? trailingTextColor;
+
+  /// Default color applied to leading icons.
   final Color? leadingIconsColor;
+
+  /// Background color of each [SettingsSection] card.
   final Color? settingsSectionBackground;
+
+  /// Color of the divider between tiles.
   final Color? dividerColor;
+
+  /// Text color for tile descriptions.
   final Color? tileDescriptionTextColor;
+
+  /// Background color shown on tile hover / press.
   final Color? tileHighlightColor;
+
+  /// Text color for section titles.
   final Color? titleTextColor;
+
+  /// Text color for tile titles.
   final Color? settingsTileTextColor;
+
+  /// Title color used when a tile is disabled.
   final Color? inactiveTitleColor;
+
+  /// Subtitle color used when a tile is disabled.
   final Color? inactiveSubtitleColor;
 
   /// Custom text style for tile titles. Overrides the default platform style.
@@ -78,6 +100,8 @@ class SettingsThemeData {
   /// Custom text style for section titles. Overrides the default platform style.
   final TextStyle? sectionTitleTextStyle;
 
+  /// Returns a new [SettingsThemeData] where every non-null field in [theme]
+  /// replaces the corresponding field in this instance.
   SettingsThemeData merge({SettingsThemeData? theme}) {
     if (theme == null) return this;
 
@@ -99,6 +123,7 @@ class SettingsThemeData {
     );
   }
 
+  /// Creates a copy of this theme data with the given fields replaced.
   SettingsThemeData copyWith({
     Color? settingsListBackground,
     Color? trailingTextColor,

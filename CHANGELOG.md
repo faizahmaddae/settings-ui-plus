@@ -1,3 +1,8 @@
+## 0.2.3
+
+- Added dartdoc comments to all public API members for full documentation coverage.
+- Removed unnecessary library name to fix `unnecessary_library_name` lint.
+
 ## 0.2.2
 
 - Fixed LICENSE file formatting so pub.dev correctly recognizes Apache-2.0.

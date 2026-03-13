@@ -15,6 +15,8 @@ enum SettingsTileType { simpleTile, switchTile, navigationTile, sliderTile }
 /// - [SettingsTile.switchTile] — shows a toggle switch.
 /// - [SettingsTile.radioTile] — shows a checkmark when [selected].
 class SettingsTile extends AbstractSettingsTile {
+  /// Creates a basic settings tile with a [title] and optional [leading],
+  /// [trailing], [value], and [description] widgets.
   const SettingsTile({
     this.leading,
     this.trailing,
@@ -37,6 +39,7 @@ class SettingsTile extends AbstractSettingsTile {
        sliderActiveColor = null,
        tileType = SettingsTileType.simpleTile;
 
+  /// Creates a navigation tile that displays a trailing chevron indicator.
   const SettingsTile.navigation({
     this.leading,
     this.trailing,
@@ -59,6 +62,7 @@ class SettingsTile extends AbstractSettingsTile {
        sliderActiveColor = null,
        tileType = SettingsTileType.navigationTile;
 
+  /// Creates a tile with an integrated platform-native toggle switch.
   const SettingsTile.switchTile({
     required this.initialValue,
     required this.onToggle,
@@ -149,11 +153,22 @@ class SettingsTile extends AbstractSettingsTile {
   /// A function that is called by long-press on a tile
   final Function(BuildContext context)? onLongPress;
 
+  /// The color of the switch thumb/track when active.
   final Color? activeSwitchColor;
+
+  /// An optional value widget shown between [title] and the trailing widget.
   final Widget? value;
+
+  /// Callback invoked when the switch is toggled. Only used by [SettingsTile.switchTile].
   final Function(bool value)? onToggle;
+
+  /// The visual type of this tile.
   final SettingsTileType tileType;
+
+  /// The initial on/off state for [SettingsTile.switchTile].
   final bool? initialValue;
+
+  /// Whether this tile is interactive. Disabled tiles are dimmed.
   final bool enabled;
 
   /// Whether this tile is the selected option in a radio group.

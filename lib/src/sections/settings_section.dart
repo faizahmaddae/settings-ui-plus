@@ -21,8 +21,13 @@ class SettingsSection extends AbstractSettingsSection {
     super.key,
   });
 
+  /// The tiles displayed inside this section.
   final List<AbstractSettingsTile> tiles;
+
+  /// Optional margin around the section.
   final EdgeInsetsDirectional? margin;
+
+  /// Optional title widget displayed above the tiles.
   final Widget? title;
 
   /// Optional footer widget displayed below the section tiles.

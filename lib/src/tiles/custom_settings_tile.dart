@@ -8,6 +8,7 @@ import 'package:settings_ui_plus/src/tiles/abstract_settings_tile.dart';
 class CustomSettingsTile extends AbstractSettingsTile {
   const CustomSettingsTile({required this.child, super.key});
 
+  /// The custom widget to render as a tile.
   final Widget child;
 
   @override
