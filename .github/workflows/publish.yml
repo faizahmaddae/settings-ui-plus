@@ -1,0 +1,58 @@
+# Publish to pub.dev when a version tag is pushed.
+#
+# Uses the official dart-lang reusable workflow for reliable OIDC publishing.
+# Runs format, analyze, and tests first, then publishes via dart-lang's workflow.
+#
+# Usage:
+#   1. Update version in pubspec.yaml (e.g., 0.3.0)
+#   2. Update CHANGELOG.md with release notes
+#   3. Commit and push
+#   4. Tag and push: git tag v0.3.0 && git push origin v0.3.0
+#
+# One-time setup:
+#   1. Go to https://pub.dev/packages/settings_ui_plus/admin
+#   2. Under "Automated publishing", enable publishing from GitHub Actions
+#   3. Set repository to: faizahmaddae/settings-ui-plus
+#   4. Set tag pattern to: v{{version}}
+
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  # Job 1: Run all checks before publishing
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - run: flutter pub get
+      - run: dart format --set-exit-if-changed .
+      - run: flutter analyze
+      - run: flutter test
+
+      - name: Verify version matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
+          PUBSPEC_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+          if [ "$TAG_VERSION" != "$PUBSPEC_VERSION" ]; then
+            echo "ERROR: Tag v$TAG_VERSION does not match pubspec.yaml version $PUBSPEC_VERSION"
+            echo "Update pubspec.yaml version to $TAG_VERSION before tagging."
+            exit 1
+          fi
+          echo "Version verified: $TAG_VERSION"
+
+  # Job 2: Publish using official dart-lang workflow (handles OIDC automatically)
+  publish:
+    needs: checks
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
