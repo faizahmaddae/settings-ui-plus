@@ -1,4 +1,4 @@
-## 0.2.3
+## 0.2.4
 
 ### New Features
 - **`SearchableSettingsList`** — drop-in replacement for `SettingsList` with a built-in search bar that filters sections and tiles in real time by title and description.
