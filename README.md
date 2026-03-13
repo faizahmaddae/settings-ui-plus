@@ -106,6 +106,26 @@ A full example app with multiple sections, sub-screens, theme switching, radio t
 
 ---
 
+## Why settings_ui_plus?
+
+The original [`settings_ui`](https://github.com/yako-dev/flutter-settings-ui) package has been inactive since 2023. This fork fixes bugs, adds features, and stays up to date with Flutter.
+
+| | `settings_ui` | `settings_ui_plus` |
+|---|---|---|
+| Maintained | Inactive | Active |
+| Flutter 3.x / Material 3 | Partial | Full |
+| Slider tiles | — | Built-in |
+| Radio tiles | — | Built-in |
+| Expandable sections | — | Built-in |
+| Section footers | — | Built-in |
+| Long-press callbacks | — | All tiles |
+| Custom sections | — | Built-in |
+| Theming | Limited | 14 properties, light + dark |
+| Accessibility | Basic | Semantics, touch targets, reduced-motion |
+| Desktop | Minimal | Hover, focus, pointer cursor |
+
+---
+
 ## License
 
 Apache 2.0 — inherited from the original [`settings_ui`](https://github.com/yako-dev/flutter-settings-ui) package. See [LICENSE](LICENSE) for details.
