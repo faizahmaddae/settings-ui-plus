@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:settings_ui_plus/settings_ui_plus.dart';
+import 'package:settings_ui_plus/src/tiles/settings_tile.dart'
+    show SettingsTileType;
 
 class MaterialSettingsTile extends StatelessWidget {
   const MaterialSettingsTile({
@@ -33,9 +35,9 @@ class MaterialSettingsTile extends StatelessWidget {
   final Widget? leading;
   final Widget? title;
   final Widget? description;
-  final Function(BuildContext context)? onPressed;
-  final Function(BuildContext context)? onLongPress;
-  final Function(bool value)? onToggle;
+  final void Function(BuildContext context)? onPressed;
+  final void Function(BuildContext context)? onLongPress;
+  final ValueChanged<bool>? onToggle;
   final Widget? value;
   final bool initialValue;
   final bool enabled;

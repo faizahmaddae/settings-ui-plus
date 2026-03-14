@@ -112,6 +112,7 @@ class _SearchableSettingsListState extends State<SearchableSettingsList> {
         : _filterSections(widget.sections, query);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding:
@@ -134,7 +135,7 @@ class _SearchableSettingsListState extends State<SearchableSettingsList> {
             ),
           ),
         ),
-        Expanded(
+        Flexible(
           child: SettingsList(
             sections: filtered,
             shrinkWrap: widget.shrinkWrap,

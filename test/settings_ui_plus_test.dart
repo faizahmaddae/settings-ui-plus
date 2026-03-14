@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:settings_ui_plus/settings_ui_plus.dart';
 import 'package:settings_ui_plus/src/sections/platforms/material_settings_section.dart';
+import 'package:settings_ui_plus/src/tiles/settings_tile.dart'
+    show SettingsTileType;
 import 'package:settings_ui_plus/src/tiles/platforms/material_settings_tile.dart';
 import 'package:settings_ui_plus/src/utils/theme_provider.dart';
 

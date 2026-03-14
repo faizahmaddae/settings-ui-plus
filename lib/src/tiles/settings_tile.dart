@@ -244,10 +244,10 @@ class SettingsTile extends AbstractSettingsTile {
   final Widget? description;
 
   /// A function that is called by tap on a tile
-  final Function(BuildContext context)? onPressed;
+  final void Function(BuildContext context)? onPressed;
 
   /// A function that is called by long-press on a tile
-  final Function(BuildContext context)? onLongPress;
+  final void Function(BuildContext context)? onLongPress;
 
   /// The color of the switch thumb/track when active.
   final Color? activeSwitchColor;
@@ -256,7 +256,7 @@ class SettingsTile extends AbstractSettingsTile {
   final Widget? value;
 
   /// Callback invoked when the switch is toggled. Only used by [SettingsTile.switchTile].
-  final Function(bool value)? onToggle;
+  final ValueChanged<bool>? onToggle;
 
   /// The visual type of this tile.
   final SettingsTileType tileType;
