@@ -1,3 +1,7 @@
+## 0.2.8
+
+- Fixed `SearchableSettingsList` dropping `CustomSettingsSection` (and other non-`SettingsSection` types) from results when a search query is active.
+
 ## 0.2.7
 
 - Fixed CI golden test failures by excluding platform-sensitive golden tests from CI runners.
