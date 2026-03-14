@@ -1,11 +1,11 @@
 # settings_ui_plus
 
 [![Pub Version](https://img.shields.io/pub/v/settings_ui_plus)](https://pub.dev/packages/settings_ui_plus)
+[![CI](https://github.com/faizahmaddae/settings-ui-plus/actions/workflows/ci.yml/badge.svg)](https://github.com/faizahmaddae/settings-ui-plus/actions/workflows/ci.yml)
+[![Pub Points](https://img.shields.io/pub/points/settings_ui_plus)](https://pub.dev/packages/settings_ui_plus/score)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Build native-looking settings screens in Flutter with minimal effort. Automatically adapts to **Material** and **Cupertino** design guidelines.
-
-> A maintained fork of the original [`settings_ui`](https://github.com/yako-dev/flutter-settings-ui) package — modernized, improved, and actively developed.
+Build native-looking settings screens in Flutter with minimal effort. Automatically adapts to **Material** and **Cupertino** design guidelines. A maintained, modernized fork of [`settings_ui`](https://github.com/yako-dev/flutter-settings-ui).
 
 ---
 
