@@ -2604,6 +2604,47 @@ void main() {
       expect(find.text('Section B'), findsNothing);
       expect(find.text('Banana'), findsNothing);
     });
+
+    testWidgets('keeps CustomSettingsSection visible during search', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        materialApp(
+          SearchableSettingsList(
+            sections: [
+              const SettingsSection(
+                title: Text('General'),
+                tiles: [
+                  SettingsTile(
+                    title: Text('Language'),
+                    searchTerms: ['language'],
+                  ),
+                ],
+              ),
+              CustomSettingsSection(
+                child: Container(
+                  key: const Key('custom-banner'),
+                  height: 50,
+                  color: Colors.blue,
+                  child: const Text('Banner'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Before search, the custom section is visible.
+      expect(find.text('Banner'), findsOneWidget);
+
+      // Type a query — Language matches, but the custom section should
+      // also remain visible.
+      await tester.enterText(find.byType(TextField), 'language');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Language'), findsOneWidget);
+      expect(find.text('Banner'), findsOneWidget);
+    });
   });
 
   // ---------------------------------------------------------------------------

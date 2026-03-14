@@ -187,8 +187,11 @@ class _SearchableSettingsListState extends State<SearchableSettingsList> {
             ),
           );
         }
+      } else {
+        // Non-SettingsSection sections (e.g. CustomSettingsSection) are
+        // kept as-is so they remain visible during search.
+        result.add(section);
       }
-      // Non-SettingsSection sections (custom) are kept as-is when no query
     }
 
     return result;
